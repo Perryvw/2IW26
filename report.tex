@@ -1,0 +1,90 @@
+\documentclass[12pt]{report}
+\title{System validation document}
+\date{\today \\ Version 0.0.1}
+
+\usepackage[latin1]{inputenc}
+\usepackage{amsmath}
+\usepackage{pdfpages}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{a4wide}
+\usepackage{enumitem}
+\usepackage{url}
+\usepackage{scrextend}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage[parfill]{parskip}
+\usepackage{appendix}
+\usepackage{subcaption}
+\usepackage{color}
+\usepackage{booktabs}
+\usepackage{lineno}
+\usepackage{float}
+\usepackage{longtable}
+\usepackage{colortbl}
+\newcounter{counter}
+
+%\linenumbers
+\modulolinenumbers[5]
+
+\begin{document}
+	\begin{titlepage}
+		\begin{center}
+			\textsc{\Large EINDHOVEN UNIVERSITY OF TECHNOLOGY}\\[1.5cm]
+			
+			\textsc{\Large System Validation}\\[0.8cm]
+			\hrule
+			\vspace{0.5cm}
+			{ \huge \bfseries EUV Wafer Stepper \\[0.4cm] }
+			\hrule
+			\vspace{1.5cm}
+			\noindent
+			\begin{minipage}[t]{0.5\textwidth}
+				\begin{flushleft} \large
+					\emph{Authors:}\\
+					R.M. van den Hurk (0817761)\\
+					S. Majoor (0805908)\\
+					P.M.M. van Wesel (0818131)\\
+				\end{flushleft}
+			\end{minipage}\\
+			\vspace{5cm}
+			\begin{minipage}[t][8cm]{0.3\textwidth}
+				\begin{flushright} \large
+					\today
+				\end{flushright}
+			\end{minipage}
+			
+			\vfill
+			
+		\end{center}
+	\end{titlepage}
+	
+	\tableofcontents
+	
+	\chapter{System overview}
+	
+	\section{Global overview} 
+	A global overview of the system.
+	
+	\chapter{System requirements}
+	
+	\newcommand{\req}[1]{
+		\item \textbf{R\stepcounter{counter}\arabic{counter}} - {#1}
+	}
+	
+	\section{Liveness requirement}
+	\begin{itemize}
+		\req{LIVENESS}
+		\req{sup}
+	\end{itemize}
+	
+	\section{Sluice requirements}
+	\section{Sluice robot requirements}
+	\section{Inside robot requirements}
+	\section{Projector requirements}
+	
+	\chapter{System interactions}
+	
+	
+
+\end{document}
