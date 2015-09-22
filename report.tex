@@ -69,19 +69,50 @@
 	\chapter{System requirements}
 	
 	\newcommand{\req}[1]{
-		\item \textbf{R\stepcounter{counter}\arabic{counter}} - {#1}
+		\item[\textbf{R\stepcounter{counter}\arabic{counter}}] {#1}
+		\hrule
 	}
 	
 	\section{Liveness requirement}
 	\begin{itemize}
-		\req{LIVENESS}
-		\req{sup}
+		\req{If the system is operating normally, an untreated wafer on the input rack will enter the system, and exit the system after it has been treated.}
 	\end{itemize}
 	
 	\section{Sluice requirements}
+	\begin{itemize}
+		\req{Only one sluice door can be open at a time.}
+		\req{The outer sluice door can only open if there is normal air pressure inside the sluice.}
+		\req{The inner sluice door can only open if there is a vacuum inside the sluice.}
+		\req{The vacuum pump can only make a vacuum if both sluice doors are closed.}
+		\req{The doors of a sluice can not close if a robot is reaching inside.}
+	\end{itemize}
+	
 	\section{Sluice robot requirements}
+	\begin{itemize}
+		\req{Robot A may only move to a sluice if the outer door of the target sluice is open.}
+		\req{Robot B may only move to a sluice if the inside door of the target sluice is open.}
+		\req{Robot A\&B may only choose a sluice to put a wafer in that is empty.}
+		\req{Robot A\&B may only try to retrieve a wafer from an occupied sluice.}
+		\req{Robot A\&B can only put a wafer on an empty spot on the rack.}
+		\req{Robot A\&B may only target functioning sluices.}
+		\req{Robot A\&B should only try to take wafers from the rack if there are wafers available.}
+		\req{Robot B may not access the same spot on the rack as Robot C at the same time.}
+	\end{itemize}
+	
 	\section{Inside robot requirements}
+	\begin{itemize}
+		\req{Robot C can not access the same spot on the rack as Robot B at the same time.}
+		\req{If there is no wafer on the projection platform Robot C should try to take a wafer from the rack and place it on the projection platform.}
+		\req{Robot C can not put a wafer on the projection platform when it is occupied.}
+		\req{Robot C can not take a wafer from the projection platform if the projection is not done.}
+		\req{If the projection is done, Robot C should take the wafer from the projection platform.}
+		\req{Robot C can not put a wafer on an occupied place on the rack.}
+	\end{itemize}
+		
 	\section{Projector requirements}
+	\begin{itemize}
+		\req{The projector only starts its treatment when a wafer is on the projection platform.}
+	\end{itemize}
 	
 	\chapter{System interactions}
 	
