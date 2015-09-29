@@ -4,6 +4,7 @@
 
 \usepackage[latin1]{inputenc}
 \usepackage{amsmath}
+\usepackage{graphicx}
 \usepackage{a4wide}
 \usepackage{enumitem}
 \usepackage{url}
@@ -215,10 +216,23 @@
 		\reqb{SR21}{treatWafer can only happen after robotCTreatWafer if no robotCRetrieve happened after that.}
 	\end{itemize}
 	
-	\section{System model}
+	\chapter{System model}
+	\section{Schematic overview}
+	\includegraphics[scale=0.9]{modelschema}
+	
+	\section{Formal model}
 	\textbf{sort}\\
 		Id = $\mathbb{N}$\\
-		Wafer = struct w(Id)\\
+		Wafer = struct $w_1 | w_2$\\
 		p1, p2, p3 = $\mathbb{N}$\\
+		
+	\textbf{something}\\
+		Robot 1 = $\sum\nolimits_{p_1 \in Input} take1( w_1, p_1 ) \cdot \sum\nolimits_{s \in Sluices} deposit1( w_1, s ) +$\smallskip\\ 
+		\- \hspace{4.3em} $\sum\nolimits_{s \in Sluices} take5( w_2, s ) \cdot \sum\nolimits_{p_3 \in Output} deposit5( w_2, p_3 )$\bigskip\\
+		Robot 2 = $\sum\nolimits_{s \in Sluices} take2( w_1, s ) \cdot \sum\nolimits_{p_2 \in Rack} deposit2( w_1, p_2 ) +$\smallskip\\ 
+		\- \hspace{4.3em} $\sum\nolimits_{p_2 \in Rack} take4( w_2, p_2 ) \cdot \sum\nolimits_{s \in Sluices} deposit4( w_2, s )$ \bigskip\\
+		Robot 3 = $\sum\nolimits_{p_2 \in Rack} take3( w_1, p_2 ) \cdot treat( w_1 ) +$\smallskip\\ 
+		\- \hspace{4.3em} $retrieve( w_2 ) \cdot \sum\nolimits_{p_2 \in Rack} deposit4( w_2, p_2 )$\bigskip\\
+		Projector = $treat( w_1 ) \cdot treatWafer \cdot retrieve( w_1 )$
 
 \end{document} 
