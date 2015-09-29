@@ -17,6 +17,7 @@
 \usepackage{float}
 \usepackage{longtable}
 \usepackage{colortbl}
+\usepackage{amsfonts}
 \newcounter{counter}
 
 %\linenumbers
@@ -213,5 +214,11 @@
 	\begin{itemize}
 		\reqb{SR21}{treatWafer can only happen after robotCTreatWafer if no robotCRetrieve happened after that.}
 	\end{itemize}
+	
+	\section{System model}
+	\textbf{sort}\\
+		Id = $\mathbb{N}$\\
+		Wafer = struct w(Id)\\
+		p1, p2, p3 = $\mathbb{N}$\\
 
 \end{document} 
