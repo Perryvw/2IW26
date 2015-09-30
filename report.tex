@@ -134,17 +134,16 @@
 
 	\section{System events}
 	\begin{itemize}
-\item outerDoorOpened(N) - The outer door of sluice N was opened.
-\item outerDoorClosed(N) - The outer door of sluice N was closed.
-\item innerDoorOpened(N) - The inner door of sluice N was opened
-\item innerDoorClosed(N) - The inner door of sluice N was closed. 
-\item vacuumDone(N) - A vacuum was created in sluice N.
-\item vacuumReleased(N) - The vacuum in sluice N was released.
-\item waferInSluice(R, N) - Robot R has put a wafer in sluice N and has moved out of the sluice.
-\item robotTookWafer(R, P) - Robot R took a wafer from position P and has moved out of the way.
-\item waferOnRack(R, P) - Robot R has put a wafer on its output rack.
-\item waferTreated - A wafer was treated.
+\item outerDoorOpen(N) - True if the outer door of sluice N is open false otherwise.
+\item innerDoorOpen(N) - True if the outer door of sluice N is open false otherwise.
+\item vacuum(N) - True if there is currently a vacuum in sluice N false otherwise.
+\item waferInSluice(N) - True if there is a wafer is sluice N false otherwise
+\item robotInSluice(N) - True if there is a robot in sluice N false otherwise
+\item robotAccessingRack(R, N) -  True if robot R is currently accesing rack N.
+\item waferOnRack(R, P) - True if there is a wafer in rack R at position P false otherwise
+\item waferTreated - True if the wafer in the projector has been treated false otherwise
 \item sluiceBroken(N) - Sluice N has failed to respond to a user action and will be marked as broken.
+\item waferInProjector - Whether there is a wafer in projector or not.
 	\end{itemize}
 	
 	\chapter{Requirements in terms of interactions}
@@ -168,50 +167,50 @@
 	
 	\section{Sluice requirements}
 	\begin{itemize}
-		\reqb{SR2}{openOuterDoor(N) can only happen after innerDoorOpened(N) if innerDoorClosed(N) happened in between.}
-		\reqb{SR3}{openOuterDoor(N) can only happen after vacuumReleased(N), as long as pumpVacuum(N) has not happened after that.}
-		\reqb{SR4}{openInnerDoor(N) can only happen if vacuumDone(N) has happened and no releaseVacuum(N) happened after that.}
-		\reqb{SR5}{pumpVacuum(N) can only happen if outerDoorClosed(N) and innerDoorClosed(N) happened before.}
+		\reqb{SR2}{openOuterDoor(N) if innerDoorOpen(N) is true.}
+		\reqb{SR3}{openOuterDoor(N) vacuum(N) is false.}
+		\reqb{SR4}{openInnerDoor(N) vacuum(N) is true.}
+		\reqb{SR5}{pumpVacuum(N) outerDoorOpen(N) and innerDoorOpen(N) are both true.}
 		\reqb{SR6}{
 \begin{itemize}		
-		\item closeOuterDoor(N) can only happen after a robotWaferInSluice(A, N) if waferInSluice(A, N) happened in between.
-\item closeInnerDoor(N) can only happen after robotWaferInSluice(B, N) if waferInSluice(B, N) happened in between.
+		\item closeOuterDoor(N) can only happen if robotInSluice(N) is false.
+\item closeInnerDoor(N) can only happen if robotInSluice(N) is false.
 \end{itemize}		
 		}
 	\end{itemize}
 	
 	\section{Sluice robot requirements}
 	\begin{itemize}
-		\reqb{SR7}{robotWaferInSluice(A,N) can only happen if outerDoorOpened(N) happened after closeOuterDoor(N).}
-		\reqb{SR8}{robotWaferInSluice(B,N) can only happen if innerDoorOpened(N) happened before closeOuterDoor(N).}
+		\reqb{SR7}{robotWaferInSluice(A,N) can only happen if outerDoorOpen(N) is true.}
+		\reqb{SR8}{robotWaferInSluice(B,N) can only happen if innerDoorOpen(N) is true.}
 		\reqb{SR9}{\begin{itemize}
-		\item  robotWaferInSluice(A, N) can only happen if robotWaferFromSluice(B, N) happened and waferInSluice(B, N) did not happen in between.
-		\item robotWaferInSluice(B, N) can only happen if robotWaferFromSluice(A, N) happened and waferInSluice(A, N) did not happen in between.
+		\item  robotWaferInSluice(A, N) waferInSluice(N) is false.
+		\item robotWaferInSluice(B, N) waferInSluice(N) is false.
 		\end{itemize}}
 		\reqb{SR10}{
 		\begin{itemize}
-		\item robotWaferFromSluice(A, N) can only happen if waferInSluice(B, N) happened before and no robotWaferFromSluice(A, N) in between.
-		\item robotWaferFromSluice(B, N) can only happen if waferInSluice(A, N) happened before and no robotWaferFromSluice(B, N) in between.
+		\item robotWaferFromSluice(A, N) can only happen if  waferInSluice(N) is true
+		\item robotWaferFromSluice(B, N) can only happen if waferInSluice(N) is true.
 		\end{itemize}
 		}
 		\reqb{SR11}{?}
-		\reqb{SR12}{openOuterDoor(N), closeOuterDoor(N), openInnerDoor(N), closeInnerDoor(N), pumpVacuum(N), releaseVacuum(N), robotWaferInSluice(R,N),robotWaferFromSluice(R,N),outerDoorOpened(N), outerDoorClosed(N),innerDoorOpened(N),innerDoorClosed(N),vacuumDone(N) and vacuumReleased(N) can only happen if sluiceBroken(N) has not happened.}
+		\reqb{SR12}{openOuterDoor(N), closeOuterDoor(N), openInnerDoor(N), closeInnerDoor(N), pumpVacuum(N), releaseVacuum(N), robotWaferInSluice(R,N),robotWaferFromSluice(R,N),outerDoorOpened(N), outerDoorClosed(N),innerDoorOpened(N),innerDoorClosed(N),vacuumDone(N) and vacuumReleased(N) can only happen if sluiceBroken(N) is false.}
 		\reqb{SR13}{?}
-		\reqb{SR14}{RobotTakeWafer(B, p) or RobotDepositWafer(B, p) can not happen in between a RobotTakeWafer(C, p) and RobotTookWafer(C, p) or between RobotDepositWafer(C, p) and waferOnRack(C, p).}	\end{itemize}
+		\reqb{SR14}{RobotTakeWafer(B, p) or RobotDepositWafer(B, p)can only happen if robotAccessingRack(C,C\_Rack) is false.}	\end{itemize}
 	
 	\section{Inside robot requirements}
 	\begin{itemize}
-		\reqb{SR15}{RobotTakeWafer(C, p) or RobotDepositWafer(C, p) can not happen between a RobotTakeWafer(B, p) and RobotTookWafer(B, p)  between RobotDepositWafer(B, p) and waferOnRack(B, p).}
+		\reqb{SR15}{RobotTakeWafer(C, p) or RobotDepositWafer(C, p) can only happen if robotAccessingRack(B,C\_Rack) is false. }
 		\reqb{SR16}{should?}
-		\reqb{SR17}{robotCTreatWafer can only happen if $\#robotCTakeWafer \geq \#robotCTreatWafer + inital\_wafer$.}
-		\reqb{SR18}{robotCRetreiveWafer can not happen inbetween treatWafer and waferTreated.}
+		\reqb{SR17}{robotCRetreiveWafer can only happen if waferInProjector is false.}
+		\reqb{SR18}{robotCRetreiveWafer can only happen if waferTreated is true.}
 		\reqb{SR19}{should?}
-		\reqb{SR20}{robotWaferInSluice(C, N) can only happen if $\#robotWaferFromSluice(A, N) <= \#robotWaferFromSluice(B, N) + storage\_capacity - number\_of\_wafers\_at\_start$ and $\#robotTakeWafer(C, P) >= \#robotDepositWafer(B, P) + initial\_wafer\_at(P)$.}
+		\reqb{SR20}{robotDepositWafer(C, N) can only happen if waferOnRack(C\_Rack, P) is true for some P.}
 	\end{itemize}
 		
 	\section{Projector requirements}
 	\begin{itemize}
-		\reqb{SR21}{treatWafer can only happen after robotCTreatWafer if no robotCRetrieve happened after that.}
+		\reqb{SR21}{treatWafer can only happen if waferInProjector is true and waferTreated is false.}
 	\end{itemize}
 
 \end{document} 
