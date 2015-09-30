@@ -117,7 +117,7 @@
 	\end{itemize}
 	
 	\chapter{System interactions}
-	\section{User actions}
+\section{User actions}
 	\begin{itemize}
 \item openOuterDoor(N) - Open the outer door of sluice N.
 \item closeOuterDoor(N) - Close the outer door of sluice N.
@@ -198,7 +198,7 @@
 		\reqb{SR11}{?}
 		\reqb{SR12}{openOuterDoor(N), closeOuterDoor(N), openInnerDoor(N), closeInnerDoor(N), pumpVacuum(N), releaseVacuum(N), robotWaferInSluice(R,N),robotWaferFromSluice(R,N),outerDoorOpened(N), outerDoorClosed(N),innerDoorOpened(N),innerDoorClosed(N),vacuumDone(N) and vacuumReleased(N) can only happen if sluiceBroken(N) is false.}
 		\reqb{SR13}{?}
-		\reqb{SR14}{RobotTakeWafer(B, p) or RobotDepositWafer(B, p)can only happen if robotAccessingRack(C,C\_Rack) is false.}	\end{itemize}
+		\reqb{SR14}{RobotTakeWafer(B, p) or RobotDepositWafer(B, p) can only happen if robotAccessingRack(C,C\_Rack) is false.}	\end{itemize}
 	
 	\section{Inside robot requirements}
 	\begin{itemize}
@@ -209,10 +209,9 @@
 		\reqb{SR19}{should?}
 		\reqb{SR20}{robotDepositWafer(C, N) can only happen if waferOnRack(C\_Rack, P) is true for some P.}
 	\end{itemize}
-		
 	\section{Projector requirements}
 	\begin{itemize}
-		\reqb{SR21}{treatWafer can only happen if waferInProjector is true and waferTreated is false.}
+		\reqb{SR21}{treatWafer can only happen after robotCTreatWafer if no robotCRetrieve happened after that.}
 	\end{itemize}
 	
 	\chapter{System model}
