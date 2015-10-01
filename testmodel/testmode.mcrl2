@@ -16,13 +16,20 @@ eqn Ra = 0;
 	Rc = 2;
 
 act
-	S2R, S2R_R, S2R_S : Int # Wafer; %Sluices to robot
-	R2S, R2S_R, R2S_S : Int # Wafer; %Robot to sluices
-	R2P, R2P_R, R2P_P : Wafer; %Robot to projector
-	P2R, P2R_R, P2R_P: Wafer; %Projector to robot
 	TreatWafer : Wafer; %Treat a wafer
 	TakeWafer : Int # Wafer; %Robot takes wafer
 	DepositWafer : Int # Wafer; %Robot reposits wafer
+
+	S2R : Int # Wafer;
+	R2S : Int # Wafer;
+	P2R : Wafer;
+	R2P : Wafer;
+
+	%Comm parts
+	S2R_R, S2R_S : Int # Wafer; %Sluices to robot
+	R2S_R, R2S_S : Int # Wafer; %Robot to sluices
+	R2P_R, R2P_P : Wafer; %Robot to projector
+	P2R_R, P2R_P: Wafer; %Projector to robot
 
 map SetWaferTreated : Wafer -> Wafer;
 var n:Int;
@@ -32,18 +39,18 @@ eqn
 
 proc
 	%RobotHandler
-	R( input:WaferList, rack:WaferList, output:WaferList, w:Wafer ) = 
-		( ( input != [] ) -> TakeWafer( Ra, head( input ) ) . R2S_R( Ra, head( input ) ) . R( tail( input ), rack, output, Dummy ) ) +
-		S2R_R( Ra, w ) . DepositWafer( Ra, w ) . R( input, rack, output <| w, Dummy ) +
-		S2R_R( Rb, w ) . R2P_R( w ) . R( input, rack, output, Dummy ) +
-		P2R_R( w ) . R2S_R( Rb, w ) . R( input, rack, output, Dummy );
+	R( input:WaferList, rack:WaferList, output:WaferList ) = 
+		( ( input != [] ) -> TakeWafer( Ra, head( input ) ) . R2S_R( Ra, head( input ) ) . R( tail( input ), rack, output ) ) +
+		( sum w:Wafer . S2R_R( Ra, w ) . DepositWafer( Ra, w ) . R( input, rack, output <| w ) ) +
+		( sum w:Wafer . S2R_R( Rb, w ) . R2P_R( w ) . R( input, rack, output ) ) +
+		( sum w:Wafer . P2R_R( w ) . R2S_R( Rb, w ) . R( input, rack, output ) );
 
 	%SluiceHandler
-	S( wl:WaferList, w:Wafer ) =
-		R2S_S( Ra, w ) . S( wl <| w, w ) +
-		R2S_S( Rb, w ) . S( wl <| w, w ) +
-		(wl != [] ) -> S2R_S( Ra, head( wl ) ) . S( tail( wl ), w ) + 
-		(wl != [] ) -> S2R_S( Rb, head( wl ) ) . S( tail( wl ), w ); 
+	S( wl:WaferList ) =
+		( sum w:Wafer . R2S_S( Ra, w ) . S( wl <| w ) ) +
+		( sum w:Wafer . R2S_S( Rb, w ) . S( wl <| w ) ) +
+		( (wl != [] ) -> S2R_S( Ra, head( wl ) ) . S( tail( wl ) ) ) + 
+		( (wl != [] ) -> S2R_S( Rb, head( wl ) ) . S( tail( wl ) ) );
 
 	%Projector
 	P( occupied : Bool, w : Wafer ) =
@@ -55,8 +62,8 @@ proc
 init
 	allow({ R2S, S2R, R2P, P2R, TreatWafer, TakeWafer, DepositWafer},
 		comm({ R2S_R|R2S_S -> R2S, S2R_S|S2R_R -> S2R, R2P_R|R2P_P -> R2P, P2R_P|P2R_R -> P2R },
-			R( InitWaferList( 5 ), [], [], Dummy ) ||
-			S( [], Dummy ) ||
+			R( InitWaferList( 5 ), [], [] ) ||
+			S( [] ) ||
 			P( false, Dummy )
 		)
 	);
