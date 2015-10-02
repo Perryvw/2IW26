@@ -3,7 +3,12 @@ sort Wafer = struct wafer( Id : Int, treated:Bool );
 map Dummy : Wafer;
 eqn Dummy = wafer( -1, false );
 
-sort WaferList = List (Wafer);
+%Wafer in projector
+map WIP : Bool;
+eqn WIP = false;
+
+sort WaferSet = Set( Wafer );
+sort WaferList = List( Wafer );
 map  InitWaferList: Nat -> WaferList;
 var  n : Nat;
 eqn  InitWaferList(0)     = [];
@@ -31,6 +36,8 @@ act
 	R2P_R, R2P_P : Wafer; %Robot to projector
 	P2R_R, P2R_P: Wafer; %Projector to robot
 
+	Test;
+
 map SetWaferTreated : Wafer -> Wafer;
 var n:Int;
 	b:Bool;
@@ -39,11 +46,10 @@ eqn
 
 proc
 	%RobotHandler
-	R( input:WaferList, rack:WaferList, output:WaferList ) = 
+	R( input:WaferList, rack:WaferList, output:WaferSet ) = 
 		( ( input != [] ) -> TakeWafer( Ra, head( input ) ) . R2S_R( Ra, head( input ) ) . R( tail( input ), rack, output ) ) +
-		( sum w:Wafer . S2R_R( Ra, w ) . DepositWafer( Ra, w ) . R( input, rack, output <| w ) ) +
-		( sum w:Wafer . S2R_R( Rb, w ) . R2P_R( w ) . R( input, rack, output ) ) +
-		( sum w:Wafer . P2R_R( w ) . R2S_R( Rb, w ) . R( input, rack, output ) );
+		( sum w:Wafer . S2R_R( Ra, w ) . DepositWafer( Ra, w ) . R( input, rack, output + {w} ) ) +
+		( sum w:Wafer . S2R_R( Rb, w ) . R2P_R( w ) . P2R_R( w ) . R2S_R( Rb, w ) . R( input, rack, output ) );
 
 	%SluiceHandler
 	S( wl:WaferList ) =
@@ -57,13 +63,15 @@ proc
 		occupied ->
 			TreatWafer( w ) . P2R_P( w ).P( false, Dummy )
 		<>
-			R2P_R( w ) . P( true, w );
+			sum w:Wafer . R2P_P( w ) . P( true, w );
 
 init
-	allow({ R2S, S2R, R2P, P2R, TreatWafer, TakeWafer, DepositWafer},
-		comm({ R2S_R|R2S_S -> R2S, S2R_S|S2R_R -> S2R, R2P_R|R2P_P -> R2P, P2R_P|P2R_R -> P2R },
-			R( InitWaferList( 5 ), [], [] ) ||
-			S( [] ) ||
-			P( false, Dummy )
+	hide({ Test },
+		allow({ R2S, S2R, R2P, P2R, TreatWafer, TakeWafer, DepositWafer },
+			comm({ R2S_R|R2S_S -> R2S, S2R_S|S2R_R -> S2R, R2P_R|R2P_P -> R2P, P2R_P|P2R_R -> P2R },
+				R( InitWaferList( 2 ), [], {} ) ||
+				S( [] ) ||
+				P( false, Dummy )
+			)
 		)
 	);
