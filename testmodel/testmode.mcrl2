@@ -7,6 +7,11 @@ eqn Dummy = wafer( -1, false );
 map WIP : Bool;
 eqn WIP = false;
 
+map IsTreated : Wafer -> Bool;
+var id:Int;
+	t:Bool;
+eqn IsTreated(wafer(id,t)) = t;
+
 sort WaferSet = Set( Wafer );
 sort WaferList = List( Wafer );
 map  InitWaferList: Nat -> WaferList;
@@ -21,10 +26,12 @@ eqn Ra = 0;
 	Rc = 2;
 
 act
+	%Vital steps
 	TreatWafer : Wafer; %Treat a wafer
 	TakeWafer : Int # Wafer; %Robot takes wafer
-	DepositWafer : Int # Wafer; %Robot reposits wafer
+	DepositWafer : Wafer; %Robot reposits wafer
 
+	%Communication steps
 	S2R : Int # Wafer;
 	R2S : Int # Wafer;
 	P2R : Wafer;
@@ -36,20 +43,21 @@ act
 	R2P_R, R2P_P : Wafer; %Robot to projector
 	P2R_R, P2R_P: Wafer; %Projector to robot
 
-	Test;
-
-map SetWaferTreated : Wafer -> Wafer;
+map TreatedWafer : Wafer -> Wafer;
 var n:Int;
 	b:Bool;
 eqn
-	SetWaferTreated(wafer(n, b)) = wafer( n, true ); 
+	TreatedWafer(wafer(n, b)) = wafer( n, true ); 
 
 proc
 	%RobotHandler
-	R( input:WaferList, rack:WaferList, output:WaferSet ) = 
+	R( input:WaferList, rack:WaferSet, output:WaferSet ) = 
 		( ( input != [] ) -> TakeWafer( Ra, head( input ) ) . R2S_R( Ra, head( input ) ) . R( tail( input ), rack, output ) ) +
-		( sum w:Wafer . S2R_R( Ra, w ) . DepositWafer( Ra, w ) . R( input, rack, output + {w} ) ) +
-		( sum w:Wafer . S2R_R( Rb, w ) . R2P_R( w ) . P2R_R( w ) . R2S_R( Rb, w ) . R( input, rack, output ) );
+		( sum w:Wafer . (IsTreated(w)) -> S2R_R( Ra, w ) . DepositWafer( w ) . R( input, rack, output + {w} ) ) +
+		( sum w:Wafer . (!IsTreated(w)) -> S2R_R( Rb, w ) . R( input, rack + {w}, output ) ) +
+		( sum w:Wafer . (w in rack && !IsTreated(w) ) -> R2P_R( w ) . R( input, rack - {w}, output ) ) +
+		( sum w:Wafer . (IsTreated(w)) -> P2R_R( w ) . R( input, rack + {w}, output ) ) +
+		( sum w:Wafer . (w in rack && IsTreated(w) ) -> R2S_R( Rb, w ) . R( input, rack - {w}, output ) );
 
 	%SluiceHandler
 	S( wl:WaferList ) =
@@ -61,17 +69,17 @@ proc
 	%Projector
 	P( occupied : Bool, w : Wafer ) =
 		occupied ->
-			TreatWafer( w ) . P2R_P( w ).P( false, Dummy )
+			TreatWafer( w ) . P2R_P( TreatedWafer( w ) ).P( false, Dummy )
 		<>
 			sum w:Wafer . R2P_P( w ) . P( true, w );
 
 init
-	hide({ Test },
+	%hide({ R2S, S2R, R2P, P2R },
 		allow({ R2S, S2R, R2P, P2R, TreatWafer, TakeWafer, DepositWafer },
 			comm({ R2S_R|R2S_S -> R2S, S2R_S|S2R_R -> S2R, R2P_R|R2P_P -> R2P, P2R_P|P2R_R -> P2R },
-				R( InitWaferList( 2 ), [], {} ) ||
+				R( InitWaferList( 2 ), {}, {} ) ||
 				S( [] ) ||
 				P( false, Dummy )
 			)
-		)
+		%)
 	);
