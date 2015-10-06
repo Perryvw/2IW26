@@ -3,10 +3,6 @@ sort Wafer = struct wafer( Id : Int, treated:Bool );
 map Dummy : Wafer;
 eqn Dummy = wafer( -1, false );
 
-%Wafer in projector
-map WIP : Bool;
-eqn WIP = false;
-
 map IsTreated : Wafer -> Bool;
 var id:Int;
 	t:Bool;
@@ -20,28 +16,33 @@ eqn  InitWaferList(0)     = [];
 0 < n -> InitWaferList(n) = wafer( n, false ) |> InitWaferList( max( n - 1, 0 ) );
 
 %Define robot constants
-map Ra, Rb, Rc : Int;
-eqn Ra = 0;
-	Rb = 1;
-	Rc = 2;
+sort RobotID = struct Ra | Rb | Rc;
+sort SluiceID = struct S0 | S1 | S2;
 
 act
 	%Vital steps
 	TreatWafer : Wafer; %Treat a wafer
-	TakeWafer : Int # Wafer; %Robot takes wafer
+	TakeWafer : RobotID # Wafer; %Robot takes wafer
 	DepositWafer : Wafer; %Robot reposits wafer
 
 	%Communication steps
-	S2R : Int # Wafer;
-	R2S : Int # Wafer;
+	S2R : RobotID # SluiceID # Wafer;
+	R2S : RobotID # SluiceID # Wafer;
 	P2R : Wafer;
 	R2P : Wafer;
 
 	%Comm parts
-	S2R_R, S2R_S : Int # Wafer; %Sluices to robot
-	R2S_R, R2S_S : Int # Wafer; %Robot to sluices
+	S2R_R, S2R_S : RobotID # SluiceID # Wafer; %Sluices to robot
+	R2S_R, R2S_S : RobotID # SluiceID # Wafer; %Robot to sluices
 	R2P_R, R2P_P : Wafer; %Robot to projector
 	P2R_R, P2R_P: Wafer; %Projector to robot
+
+	CloseInnerDoor: SluiceID;
+	CloseOuterDoor: SluiceID;
+	OpenInnerDoor: SluiceID;
+	OpenOuterDoor: SluiceID;
+	PumpVacuum: SluiceID;
+	ReleaseVacuum: SluiceID;
 
 map TreatedWafer : Wafer -> Wafer;
 var n:Int;
@@ -49,22 +50,30 @@ var n:Int;
 eqn
 	TreatedWafer(wafer(n, b)) = wafer( n, true ); 
 
+sort SluiceDoorState = struct inner_open | closed | outer_open; 
+
 proc
 	%RobotHandler
 	R( input:WaferList, rack:WaferSet, output:WaferSet ) = 
-		( ( input != [] ) -> TakeWafer( Ra, head( input ) ) . R2S_R( Ra, head( input ) ) . R( tail( input ), rack, output ) ) +
-		( sum w:Wafer . (IsTreated(w)) -> S2R_R( Ra, w ) . DepositWafer( w ) . R( input, rack, output + {w} ) ) +
-		( sum w:Wafer . (!IsTreated(w)) -> S2R_R( Rb, w ) . R( input, rack + {w}, output ) ) +
+		( ( input != [] ) -> TakeWafer( Ra, head( input ) ) . sum s:SluiceID . R2S_R( Ra, s, head( input ) ) . R( tail( input ), rack, output ) ) +
+		( sum w:Wafer, s:SluiceID . (IsTreated(w)) -> S2R_R( Ra, s, w ) . DepositWafer( w ) . R( input, rack, output + {w} ) ) +
+		( sum w:Wafer, s:SluiceID . (!IsTreated(w)) -> S2R_R( Rb, s, w ) . R( input, rack + {w}, output ) ) +
 		( sum w:Wafer . (w in rack && !IsTreated(w) ) -> R2P_R( w ) . R( input, rack - {w}, output ) ) +
 		( sum w:Wafer . (IsTreated(w)) -> P2R_R( w ) . R( input, rack + {w}, output ) ) +
-		( sum w:Wafer . (w in rack && IsTreated(w) ) -> R2S_R( Rb, w ) . R( input, rack - {w}, output ) );
+		( sum w:Wafer, s:SluiceID . (w in rack && IsTreated(w) ) -> R2S_R( Rb, s, w ) . R( input, rack - {w}, output ) );
 
 	%SluiceHandler
-	S( wl:WaferList ) =
-		( sum w:Wafer . R2S_S( Ra, w ) . S( wl <| w ) ) +
-		( sum w:Wafer . R2S_S( Rb, w ) . S( wl <| w ) ) +
-		( (wl != [] ) -> S2R_S( Ra, head( wl ) ) . S( tail( wl ) ) ) + 
-		( (wl != [] ) -> S2R_S( Rb, head( wl ) ) . S( tail( wl ) ) );
+	S( id:SluiceID, occupied:Bool, w:Wafer, door:SluiceDoorState ) =
+		((!occupied) -> (
+			(door == outer_open ) -> sum w2:Wafer . R2S_S( Ra, id, w2 ) . CloseOuterDoor( id ) . PumpVacuum( id ) . S( id, true, w2, closed ) +
+			(door == inner_open ) -> sum w2:Wafer . R2S_S( Rb, id, w2 ) . CloseInnerDoor( id ) . ReleaseVacuum( id ) . S( id, true, w2, closed )
+		) <> (
+			(door == outer_open ) -> S2R_S( Ra, id, w ) . S( id, false, Dummy, door ) + 
+			(door == inner_open ) -> S2R_S( Rb, id, w ) . S( id, false, Dummy, door )
+		)) +
+		(door == closed && IsTreated( w )) -> OpenOuterDoor( id ) . S( id, occupied, w, outer_open ) +
+		(door == closed && !IsTreated( w )) -> OpenInnerDoor( id ) . S( id, occupied, w, inner_open )
+	;
 
 	%Projector
 	P( occupied : Bool, w : Wafer ) =
@@ -75,10 +84,11 @@ proc
 
 init
 	%hide({ R2S, S2R, R2P, P2R },
-		allow({ R2S, S2R, R2P, P2R, TreatWafer, TakeWafer, DepositWafer },
+		allow({ R2S, S2R, R2P, P2R, TreatWafer, TakeWafer, DepositWafer, CloseOuterDoor, CloseInnerDoor, OpenInnerDoor, OpenOuterDoor, PumpVacuum, ReleaseVacuum },
 			comm({ R2S_R|R2S_S -> R2S, S2R_S|S2R_R -> S2R, R2P_R|R2P_P -> R2P, P2R_P|P2R_R -> P2R },
 				R( InitWaferList( 2 ), {}, {} ) ||
-				S( [] ) ||
+				S( S0, false, Dummy, outer_open ) ||
+				S( S1, false, Dummy, outer_open ) ||
 				P( false, Dummy )
 			)
 		%)
