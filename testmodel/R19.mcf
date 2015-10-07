@@ -1,0 +1,1 @@
+[true* ] forall w:Wafer . <TreatWafer(w). true*. P2R_R(w)> true
