@@ -60,8 +60,26 @@
 	
 	\chapter{System overview}
 	
-	\section{Global overview}
-	A global overview of the system.
+	\section{System overview}
+	\begin{figure}
+		\centering
+		\includegraphics[scale=0.7]{schematicoverview}
+		\caption{A schematic overview of the system}
+		\label{fig:overview}
+	\end{figure}
+	The Extreme Ultraviolet (EUV) Wafer Stepper is a system developed by ASML to treat silicon wafers. Treating a wafer is the act of projecting an image with ultra violet light onto a silicon wafer. Since ultra violet radiation is absorbed by air, this treatment has to happen in a vacuum to ensure the accuracy of the projection. This means wafers will have to enter and exit the system through airlocks, also referred to as sluices. One robot will move wafers from the input to the airlocks or from the airlocks to the output for treated wafers from outside the vacuum chamber. One robot will move wafers from the airlocks to a buffer rack inside the vacuum chamber and vice versa for treated wafers. A last robot, located inside the vacuum chamber, takes wafers from the internal buffer rack to the projector and back once the projector is done. A schematic overview of the system can be found in figure \ref{fig:overview}.
+	\section{System components}
+	The system can be broken down into individual components to be considered by the software. These components are the following:
+	\begin{itemize}
+	\item \textbf{Input} - A rack containing untreated wafers located outside of the vacuum chamber.
+	\item \textbf{Output} - A rack for treated wafers outside the vacuum chamber.
+	\item \textbf{Airlocks} - An array of airlocks providing entrance into the vacuum chamber. Each airlock consists of an inner door, outer door, vacuum pump and air pressure sensor.
+	\item \textbf{Buffer Rack} - The buffer rack located inside the vacuum chamber that can temporarily hold wafers.
+	\item \textbf{Projector} - The projector inside the vacuum chamber that treats the wafers.
+	\item \textbf{Robot A} - The robot that can reach \emph{Input}, \emph{Output} and the \emph{Airlocks}.
+	\item \textbf{Robot B} - The robot inside the vacuum chamber that can reach the \emph{Airlocks} and \emph{Buffer Rack}.
+	\item \textbf{Robot C} - The other robot inside the vacuum chamber that can reach the \emph{Buffer Rack} and \emph{Projector}.
+	\end{itemize}
 	
 	\chapter{System requirements}
 	
@@ -104,10 +122,8 @@
 	\section{Inside robot requirements}
 	\begin{itemize}
 		\req{Robot C can not access the same spot on the rack as Robot B at the same time.}
-		\req{If there is no wafer on the projection platform Robot C should try to take a wafer from the rack and place it on the projection platform.}
 		\req{Robot C can not put a wafer on the projection platform when it is occupied.}
 		\req{Robot C can not take a wafer from the projection platform if the projection is not done.}
-		\req{If the projection is done, Robot C should take the wafer from the projection platform.}
 		\req{Robot C can not put a wafer on an occupied place on the rack.}
 	\end{itemize}
 		
@@ -119,33 +135,40 @@
 	\chapter{System interactions}
 \section{User actions}
 	\begin{itemize}
-\item openOuterDoor(N) - Open the outer door of sluice N.
-\item closeOuterDoor(N) - Close the outer door of sluice N.
-\item openInnerDoor(N) - Open the inner door of sluice N.
-\item closeInnerDoor(N) - Close the inner door of sluice N.
-\item pumpVacuum(N) - Make a vacuum in sluice N.
-\item releaseVacuum(N) - Release the vacuum in sluice N.
-\item robotTakeWafer(R, P) - Robot R picks up a wafer from its input rack from position P.
-\item robotDepositWafer(R, P) - Robot R deposits the wafer it is holding wafer on its output rack from position P.
-\item robotWaferInSluice(R, N) - Robot R puts the wafer it is holding wafer in sluice N.
-\item robotWaferFromSluice(R, N) - Robot R takes a wafer from sluice N.
-\item robotCTreatWafer - Robot C puts the wafer it is holding on the projector.
-\item robotCRetrieveWafer - Robot C takes the wafer from the projector.
-\item treatWafer - The projector treats a wafer.
+\item OpenOuterDoor(N) - Open the outer door of sluice N.
+\item CloseOuterDoor(N) - Close the outer door of sluice N.
+\item OpenInnerDoor(N) - Open the inner door of sluice N.
+\item CloseInnerDoor(N) - Close the inner door of sluice N.
+\item PumpVacuum(N) - Make a vacuum in sluice N.
+\item ReleaseVacuum(N) - Release the vacuum in sluice N.
+
+\item RobotFromInput - Robot A picks up a wafer from the input rack.
+\item RobotToOutput - Robot A deposits a wafer on the output rack.
+
+\item RobotToSluice( R, S ) - Robot R deposits the wafer it is holding in sluice S.
+\item RobotFromSluice( R, S ) - Robot R picks up a wafer from sluice S.
+
+\item RobotToRack( R, P ) - Robot R deposits the wafer it is holding to position P on the buffer rack.
+\item RobotFromRack( R, P ) - Robot R takes a wafer from position P on the buffer rack.
+
+\item RobotToProjector - Robot C deposits the wafer it is holding on the projector.
+\item RobotFromProjector - Robot C picks up the wafer that is currently on the projector.
+
+\item TreatWafer - The projector treats a wafer.
 \end{itemize}
 
-	\section{System events}
+	\section{System properties}
 	\begin{itemize}
-\item outerDoorOpen(N) - True if the outer door of sluice N is open false otherwise.
-\item innerDoorOpen(N) - True if the outer door of sluice N is open false otherwise.
-\item vacuum(N) - True if there is currently a vacuum in sluice N false otherwise.
-\item waferInSluice(N) - True if there is a wafer is sluice N false otherwise
-\item robotInSluice(N) - True if there is a robot in sluice N false otherwise
-\item robotAccessingRack(R, N) -  True if robot R is currently accesing rack N.
-\item waferOnRack(R, P) - True if there is a wafer in rack R at position P false otherwise
-\item waferTreated - True if the wafer in the projector has been treated false otherwise
-\item sluiceBroken(N) - Sluice N has failed to respond to a user action and will be marked as broken.
-\item waferInProjector - Whether there is a wafer in projector or not.
+\item IsOuterDoorOpen(N) - True if the outer door of sluice N is open false otherwise.
+\item IsInnerDoorOpen(N) - True if the outer door of sluice N is open false otherwise.
+\item IsVacuum(N) - True if there is currently a vacuum in sluice N false otherwise.
+\item IsWaferInSluice(N) - True if there is a wafer is sluice N false otherwise
+\item IsRobotInSluice(N) - True if there is a robot in sluice N false otherwise
+\item IsRobotAccessingRack(R, N) -  True if robot R is currently accesing rack N.
+\item IsWaferOnRack(R, P) - True if there is a wafer in rack R at position P false otherwise
+\item IsWaferTreated - True if the wafer in the projector has been treated false otherwise
+\item IsSluiceBroken(N) - Sluice N has failed to respond to a user action and will be marked as broken.
+\item IsWaferInProjector - Whether there is a wafer in projector or not.
 	\end{itemize}
 	
 	\chapter{Requirements in terms of interactions}
@@ -203,11 +226,9 @@
 	\section{Inside robot requirements}
 	\begin{itemize}
 		\reqb{SR15}{RobotTakeWafer(C, p) or RobotDepositWafer(C, p) can only happen if robotAccessingRack(B,C\_Rack) is false. }
-		\reqb{SR16}{should?}
-		\reqb{SR17}{robotCRetreiveWafer can only happen if waferInProjector is false.}
-		\reqb{SR18}{robotCRetreiveWafer can only happen if waferTreated is true.}
-		\reqb{SR19}{should?}
-		\reqb{SR20}{robotDepositWafer(C, N) can only happen if waferOnRack(C\_Rack, P) is true for some P.}
+		\reqb{SR16}{robotCRetreiveWafer can only happen if waferInProjector is false.}
+		\reqb{SR17}{robotCRetreiveWafer can only happen if waferTreated is true.}
+		\reqb{SR18}{robotDepositWafer(C, N) can only happen if waferOnRack(C\_Rack, P) is true for some P.}
 	\end{itemize}
 	\section{Projector requirements}
 	\begin{itemize}
@@ -215,22 +236,53 @@
 	\end{itemize}
 	
 	\chapter{System model}
-	\section{Schematic overview}
-	\includegraphics[scale=0.9]{modelschema}
+	\section{Model overview}
+	\begin{figure}
+		\centering
+		\includegraphics[scale=0.7]{schematicoverview}
+		\caption{A schematic overview of the software components}
+		\label{fig:components}
+	\end{figure}
+	To verify the system, a model of the software to be made. The software is split up into the following three components:
+	\begin{itemize}
+	\item \textbf{SluiceManager} - This component manages the sluices, it runs parallel for each sluice. The purpose of this component is to control the individual airlocks.
+	\item \textbf{RobotManager} - This component manages the different robots in the system, and runs a parallel process for each robot.
+	\item \textbf{ProjectorManager} - The projector is managed by this component.
+	\end{itemize}
+	
+	A schematic view of this system can also be found in figure \ref{fig:components}.
+	
+	\section{Responsibilities}
+	The purpose of this separation into components is to separate responsibilities of the system, increasing the cohesion and decreasing the coupling of the system. The different actions of the system can be divided over the different components to establish this separation of responsibilities.
+	
+	\subsection*{SluiceManager}
+	\begin{itemize}
+		\item OpenOuterDoor
+		\item CloseOuterDoor
+		\item OpenInnerDoor
+		\item CloseInnerDoor
+		\item PumpVacuum
+		\item ReleaseVacuum
+	\end{itemize}
+	
+	\subsection*{RobotManager}
+	\begin{itemize}
+		\item RobotFromInput
+		\item RobotToOutput
+		\item RobotToSluice
+		\item RobotFromSluice
+		\item RobotToRack
+		\item RobotFromRack
+		\item RobotToProjector
+		\item RobotFromProjector
+	\end{itemize}		
+	
+	\subsection*{ProjectorManager}
+	\begin{itemize}
+		\item TreatWafer
+	\end{itemize}
 	
 	\section{Formal model}
-	\textbf{sort}\\
-		Id = $\mathbb{N}$\\
-		Wafer = struct $w_1 | w_2$\\
-		p1, p2, p3 = $\mathbb{N}$\\
-		
-	\textbf{something}\\
-		Robot 1 = $\sum\nolimits_{p_1 \in Input} take1( w_1, p_1 ) \cdot \sum\nolimits_{s \in Sluices} deposit1( w_1, s ) +$\smallskip\\ 
-		\- \hspace{4.3em} $\sum\nolimits_{s \in Sluices} take5( w_2, s ) \cdot \sum\nolimits_{p_3 \in Output} deposit5( w_2, p_3 )$\bigskip\\
-		Robot 2 = $\sum\nolimits_{s \in Sluices} take2( w_1, s ) \cdot \sum\nolimits_{p_2 \in Rack} deposit2( w_1, p_2 ) +$\smallskip\\ 
-		\- \hspace{4.3em} $\sum\nolimits_{p_2 \in Rack} take4( w_2, p_2 ) \cdot \sum\nolimits_{s \in Sluices} deposit4( w_2, s )$ \bigskip\\
-		Robot 3 = $\sum\nolimits_{p_2 \in Rack} take3( w_1, p_2 ) \cdot treat( w_1 ) +$\smallskip\\ 
-		\- \hspace{4.3em} $retrieve( w_2 ) \cdot \sum\nolimits_{p_2 \in Rack} deposit4( w_2, p_2 )$\bigskip\\
-		Projector = $treat( w_1 ) \cdot treatWafer \cdot retrieve( w_1 )$
+	
 
 \end{document} 
