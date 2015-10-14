@@ -1,4 +1,6 @@
 % This formula expresses that
 % R17 Robot C can not put a wafer on the projection platform when it is occupied.
 
-[true*] forall w:Wafer. [R2P( w ).true*.!P2R( w ).true*.R2P( w )] false
+%[true*]exists w:Wafer. [R2P( w ).(!P2R( w ))*.R2P( w )] false
+
+exists w:Wafer. [true*.R2P( w ).(!P2R( w ))*.R2P( w )] false
