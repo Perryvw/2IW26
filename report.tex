@@ -218,9 +218,9 @@
 		\item robotWaferFromSluice(B, N) can only happen if waferInSluice(N) is true.
 		\end{itemize}
 		}
-		\reqb{SR11}{?}
+		\reqb{SR11}{RobotToRack( R, P ) can only happen after another RobotToRack( R, P ) with the same P, if a RobotFromRack( R, P ) has happened with the same P.}
 		\reqb{SR12}{openOuterDoor(N), closeOuterDoor(N), openInnerDoor(N), closeInnerDoor(N), pumpVacuum(N), releaseVacuum(N), robotWaferInSluice(R,N),robotWaferFromSluice(R,N),outerDoorOpened(N), outerDoorClosed(N),innerDoorOpened(N),innerDoorClosed(N),vacuumDone(N) and vacuumReleased(N) can only happen if sluiceBroken(N) is false.}
-		\reqb{SR13}{?}
+		\reqb{SR13}{RobotFromRack( R, P ) can only happen if IsWaferOnRack( P ) is true for the same P.}
 		\reqb{SR14}{RobotTakeWafer(B, p) or RobotDepositWafer(B, p) can only happen if robotAccessingRack(C,C\_Rack) is false.}	\end{itemize}
 	
 	\section{Inside robot requirements}
