@@ -1,0 +1,6 @@
+% This formula expresses that
+% treatWafer can only happen after robotCTreatWafer if no robotCRetrieve happened
+% after that
+% <robotCTreatWafer><robotCRetrieve><treatWafer>false
+
+[true*] forall w:Wafer. [R2P( w ).true*.P2R( w ).true*.TreatWafer( w )]false
