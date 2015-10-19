@@ -1,0 +1,4 @@
+% This formula expresses that
+% R14 Robot B may not access the same spot on the rack as Robot C at the same time.
+
+% TODO
