@@ -1,4 +1,4 @@
 % This formula expresses that
-% robotCRetreiveWafer can only happen if waferTreated is true.
+% Robot C cannot put a wafer on an occupied position on the rack
 
-[true*] forall w:Wafer. [!TreatWafer( w ). true*. P2R( w )]false
+[true*] forall p:Nat, w:Wafer, r:RobotID. [R2Rack( r, p, w ).(!Rack2R( r, p, w ))*.R2Rack( r, p, w )]false
