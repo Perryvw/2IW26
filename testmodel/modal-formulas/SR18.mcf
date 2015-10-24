@@ -1,4 +1,4 @@
 % This formula expresses that
 % robotCRetreiveWafer can only happen if waferTreated is true.
 
-[true*] forall w:Wafer. [!TreatWafer( w ). true*. P2R( w )]false
+[true*] forall w:Wafer. [!TreatWafer( w ). true*. TakeWafer( Rc, w )]false
