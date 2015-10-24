@@ -1,0 +1,7 @@
+% This formula expresses that
+% Robot A may only try to retrieve a wafer from an occupied sluice.
+
+[true*] forall w:Wafer, s:SluiceID . [(!RobotToSluice(Rb, s, w))*  . RobotFromSluice(Ra, s, w)] false
+
+%doesn't run
+

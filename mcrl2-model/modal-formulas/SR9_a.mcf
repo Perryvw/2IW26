@@ -1,0 +1,6 @@
+% This formula expresses that
+% Robot A may only choose a sluice to put a wafer in that is empty.
+
+[true*] forall w1:Wafer, w2:Wafer, s:SluiceID . [RobotToSluice(Ra, s, w1) . (!RobotFromSluice(Rb, s,w1))* . RobotToSluice(Ra, s, w2)] false
+
+%doesn't run

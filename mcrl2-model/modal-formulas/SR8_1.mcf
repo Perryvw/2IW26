@@ -1,0 +1,6 @@
+% This formula expresses that
+% Robot B may only move to a sluice if the inside door of the target sluice is open.
+
+[true*] forall w:Wafer, s:SluiceID . [InnerDoorClosed(s) . (!InnerDoorOpened(s))* . RobotToSluice(Rb, s, w)] false
+
+%can't seem to run this one either

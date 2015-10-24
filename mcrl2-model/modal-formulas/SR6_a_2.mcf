@@ -1,0 +1,4 @@
+% This formula expresses that
+% The doors of a sluice can not close if robot A take a wafer from the input and puts it in the sluice
+
+[true*] forall w:Wafer, s:SluiceID . [RobotToSluice(Ra, s, w) . (!RobotReset(Ra)) . CloseOuterDoor(s)] false
