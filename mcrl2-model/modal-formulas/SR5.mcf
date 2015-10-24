@@ -1,4 +1,4 @@
 % This formula expresses that
 % The vacuum pump can only make a vacuum if both sluice doors are closed.
 
-forall s: SluiceID . [true* . CloseOuterDoor(s) . (!OpenOuterDoor(s))* . ReleaseVacuum(s) + CloseInnerDoor(s) . (!OpenInnerDoor(s))* . ReleaseVacuum(s)] true
+forall s: SluiceID . [true* . (OpenInnerDoor(s). (!InnerDoorClosed(s))* . PumpVacuum(s)  + OpenOuterDoor(s). (!OuterDoorClosed(s))* . PumpVacuum(s))] false

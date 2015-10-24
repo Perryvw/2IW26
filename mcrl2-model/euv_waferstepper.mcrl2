@@ -1,79 +1,111 @@
+%===========================================================================
+% Sort definitions
+%===========================================================================
+sort 
+	Wafer = struct wafer( id:Int, treated:Bool );
+	WaferSet = Set( Wafer );
+	WaferList = List( Wafer );
+	RobotID = struct Ra | Rb | Rc;
+	SluiceID = struct S0 | S1;
+	SluiceDoorState = struct inner_open | closed | outer_open; 
+
+%===========================================================================
+% Parameters
+%===========================================================================
 map RackSize: Nat;
 eqn RackSize = 3;
 
 map NumWafers: Nat;
-eqn NumWafers = 5;
+eqn NumWafers = 3;
 
 map NumSluices: Nat;
 eqn NumSluices = 2;
 
-map test:Int;
-
-map OnRack: Nat -> Bool;
-var n:Nat;
-eqn
-	( n >= 0 && n < RackSize ) -> OnRack( n ) = true;
-	( n < 0 || n >= RackSize ) -> OnRack( n ) = false;
-
-sort Wafer = struct wafer( id:Int, treated:Bool );
-
 map Dummy : Wafer;
 eqn Dummy = wafer( -1, false );
 
+map inputList : List( Wafer );
+eqn inputList = InitWaferList( NumWafers );
+
+map output : Set( Wafer );
+eqn output = {};
+
+%===========================================================================
+% Mapping definitions
+%===========================================================================
+%Return true if the wafer is treated, false otherwise
 map IsTreated : Wafer -> Bool;
 var t:Bool;
 	n:Int;
 eqn IsTreated(wafer(n, t)) = t;
 
+%Return true if the wafer is the bummy wafer, false otherwise
 map IsDummy : Wafer -> Bool;
 var t:Bool;
 	n:Int;
 eqn (n == -1) -> IsDummy( wafer( n, t ) ) = true;
 	(n != -1) -> IsDummy( wafer( n, t ) ) = false;
 
-sort WaferSet = Set( Wafer );
-sort WaferList = List( Wafer );
+%Return true if for position p holds 0 <= p < RackSize (p is a valid position on the rack).
+map OnRack: Nat -> Bool;
+var n:Nat;
+eqn
+	( n >= 0 && n < RackSize ) -> OnRack( n ) = true;
+	( n < 0 || n >= RackSize ) -> OnRack( n ) = false;
+
+%Get the treated version of some wafer
+map TreatedWafer : Wafer -> Wafer;
+var n:Int;
+	b:Bool;
+eqn
+	TreatedWafer(wafer(n,false)) = wafer( n,true ); 
+
+%Put a wafer in a list at some position
+map PutInList : List( Wafer ) # Int # Wafer -> List( Wafer );
+var l:List( Wafer );
+	p:Int;
+	w:Wafer;
+eqn PutInList([], p, w) = [];
+	(#l > 0 && #l == RackSize - p) -> PutInList( l, p, w ) = w |> PutInList( tail( l ), p, w );
+	(#l > 0 && #l != RackSize - p) -> PutInList( l, p, w ) = head( l ) |> PutInList( tail( l ), p, w );
+
+%Initalise a list that represents the rack
+map InitRack : Nat -> List( Wafer );
+var n:Nat;
+eqn InitRack( 0 ) = [];
+0 < n -> InitRack( n ) = InitRack( max( n - 1, 0 ) ) <| Dummy;
+
+%Generate a list of wafers with incremental ids for the input
 map  InitWaferList: Nat -> WaferList;
 var  n : Nat;
 eqn  InitWaferList(0)     = [];
 0 < n -> InitWaferList(n) = wafer( n, false ) |> InitWaferList( max( n - 1, 0 ) );
 
-%Define robot constants
-sort RobotID = struct Ra | Rb | Rc;
-sort SluiceID = struct S0 | S1;
-
+%===========================================================================
+% Actions
+%===========================================================================
 act
 	%Robot actions - communications
-	RobotFromSluice : RobotID # SluiceID # Wafer;
-	RobotToSluice : RobotID # SluiceID # Wafer;
-	RobotToProjector : Wafer;
-	RobotFromProjector : Wafer;
-	RobotToRack : RobotID # Nat # Wafer;
-	RobotFromRack : RobotID # Nat # Wafer;
-	RobotFromInput : RobotID # Wafer; %Robot takes wafer
+	RobotFromSluice : RobotID # SluiceID # Wafer; %A robot starts taking a wafer from a sluice
+	RobotToSluice : RobotID # SluiceID # Wafer; %A robot starts putting a wafer in a sluice
+	RobotToProjector : Wafer; %Robot C starts putting a wafer on the projector
+	RobotFromProjector : Wafer; %Robot C starts taking the wafer from the projector 
+	RobotToRack : RobotID # Nat # Wafer; %A robot starts putting a wafer on the rack
+	RobotFromRack : RobotID # Nat # Wafer; %A robot starts taking a wafer from the rack
+	RobotFromInput : Wafer; %Robot A takes 
 	RobotToOutput : Wafer; %Robot deposits wafer on output
-	RobotToInput : Wafer; %Robot reposits wafer
 
 	%Sluice actions
-	CloseInnerDoor: SluiceID;
-	CloseOuterDoor: SluiceID;
-	OpenInnerDoor: SluiceID;
-	OpenOuterDoor: SluiceID;
-	PumpVacuum: SluiceID;
-	ReleaseVacuum: SluiceID;
-	SluiceBroken : SluiceID;
+	CloseInnerDoor: SluiceID; %A sluice starts closing its inner door
+	CloseOuterDoor: SluiceID; %A sluice starts closing its outer door
+	OpenInnerDoor: SluiceID; %A sluice starts opening its inner door
+	OpenOuterDoor: SluiceID; %A sluice starts opening its outer door
+	PumpVacuum: SluiceID; %A sluice starts pumping a vacuum
+	ReleaseVacuum: SluiceID; %A sluice starts releasing its vacuum
+	SluiceBroken : SluiceID; %A sluice breaks
 
 	%Projector actions
-	TreatWafer : Wafer; %Treat a wafer
-
-	%Communication components
-	RReset_O, RReset_D : RobotID;
-	S2R_R, S2R_S : RobotID # SluiceID # Wafer; %Sluices to robot
-	R2S_R, R2S_S : RobotID # SluiceID # Wafer; %Robot to sluices
-	R2P_R, R2P_P : Wafer; %Robot to projector
-	P2R_R, P2R_P: Wafer; %Projector to robot
-	R2Rack_R, R2Rack_Rack : RobotID # Nat # Wafer;
-	Rack2R_R, Rack2R_Rack : RobotID # Nat # Wafer;
+	TreatWafer : Wafer; %The projector treats a wafer
 
 	%Events
 	RobotReset: RobotID;
@@ -85,33 +117,29 @@ act
 	VacuumReleased : SluiceID;
 	WaferTreated : Wafer;
 
-map TreatedWafer : Wafer -> Wafer;
-var n:Int;
-	b:Bool;
-eqn
-	TreatedWafer(wafer(n,false)) = wafer( n,true ); 
+	%Communication components
+	RReset_O, RReset_D : RobotID; %RobotReset
+	S2R_R, S2R_S : RobotID # SluiceID # Wafer; %RobotFromSluice
+	R2S_R, R2S_S : RobotID # SluiceID # Wafer; %RobotToSluice
+	R2P_R, R2P_P : Wafer; %RobotToProjector
+	P2R_R, P2R_P: Wafer; %RobotFromProjector
+	R2Rack_R, R2Rack_Rack : RobotID # Nat # Wafer; %RobotToRack
+	Rack2R_R, Rack2R_Rack : RobotID # Nat # Wafer; %RobotFromRack
 
-sort SluiceDoorState = struct inner_open | closed | outer_open; 
-
-map PutInList : List( Wafer ) # Int # Wafer -> List( Wafer );
-var l:List( Wafer );
-	p:Int;
-	w:Wafer;
-eqn PutInList([], p, w) = [];
-	(#l > 0 && #l-1 == RackSize - p - 1) -> PutInList( l, p, w ) = w |> PutInList( tail( l ), p, w );
-	(#l > 0 && #l-1 != RackSize - p - 1) -> PutInList( l, p, w ) = head( l ) |> PutInList( tail( l ), p, w ); 
-
+%===========================================================================
+% Process specification
+%===========================================================================
 proc
 	%RobotHandler
-	R( rID:RobotID, occupied:Bool, w:Wafer, input:WaferList, output:WaferSet, counter:Int ) =
+	R( rID:RobotID, occupied:Bool, w:Wafer, input:WaferList, output:WaferSet, counter:Nat ) =
 		( rID == Ra ) -> (
 			occupied -> (
 				( IsTreated( w ) ) -> RobotToOutput( w ) . RobotReset( rID ) . R( rID, false, Dummy, input, output + {w}, counter )
 				<> ( sum s:SluiceID . R2S_R( rID, s, w ) . RReset_O( rID ) . R( rID, false, Dummy, input, output, counter + 1 ) )
 			)
 			<> (
-				( input != [] && counter < NumSluices ) -> RobotFromInput( rID, head( input ) ) . RobotReset( rID ) . R( rID, true, head(input), tail(input), output, counter ) +
-				sum w2:Wafer, s:SluiceID . S2R_R( rID, s, w2 ) . RReset_D( rID ) . R( rID, true, w2, input, output, counter - 1 )
+				( input != [] && counter < NumSluices ) -> RobotFromInput( head( input ) ) . RobotReset( rID ) . R( rID, true, head(input), tail(input), output, counter ) +
+				sum w2:Wafer, s:SluiceID . S2R_R( rID, s, w2 ) . RReset_D( rID ) . R( rID, true, w2, input, output, Int2Nat(counter - 1) )
 			)
 		) + 
 		( rID == Rb ) -> (
@@ -162,32 +190,27 @@ proc
 		sum p:Nat, r:RobotID . ( OnRack( p ) ) -> ( !IsDummy( wl . p ) ) -> Rack2R_Rack( r, p, wl . p ) . RReset_O( r ) . Rack( PutInList( wl, p, Dummy ) )
 	;
 
-map inputList : List( Wafer );
-eqn inputList = InitWaferList( NumWafers );
-
-map output : Set( Wafer );
-eqn output = {};
-
-map InitRack : Nat -> List( Wafer );
-var n:Nat;
-eqn InitRack( 0 ) = [];
-0 < n -> InitRack( n ) = InitRack( max( n - 1, 0 ) ) <| Dummy;
-
+%===========================================================================
+% Initialisation
+%===========================================================================
 init
-	%hide({ R2S, S2R, R2P, P2R },
-		allow({ RobotToSluice, RobotFromSluice, RobotToProjector, RobotFromProjector, RobotToRack, RobotFromRack, TreatWafer, 
+	allow({ RobotToSluice, RobotFromSluice, RobotToProjector, RobotFromProjector, RobotToRack, RobotFromRack, TreatWafer, 
 		RobotFromInput, RobotToOutput, CloseOuterDoor, CloseInnerDoor, 
-		OpenInnerDoor, OpenOuterDoor, PumpVacuum, ReleaseVacuum, RobotToInput,
+		OpenInnerDoor, OpenOuterDoor, PumpVacuum, ReleaseVacuum,
 		RobotReset, WaferTreated, OuterDoorOpened, OuterDoorClosed, InnerDoorOpened, InnerDoorClosed, VacuumDone, VacuumReleased },
+
 			comm({ R2S_R|R2S_S -> RobotToSluice, S2R_S|S2R_R -> RobotFromSluice, R2P_R|R2P_P -> RobotToProjector, P2R_P|P2R_R -> RobotFromProjector, 
 				R2Rack_R|R2Rack_Rack -> RobotToRack, Rack2R_Rack|Rack2R_R -> RobotFromRack, RReset_O|RReset_D -> RobotReset },
+				%Robots
 				R( Ra, false, Dummy, inputList, output, 0 ) ||
-				R( Rb, false, Dummy, inputList, output, 0 ) ||
-				R( Rc, false, Dummy, inputList, output, 0 ) ||
+				R( Rb, false, Dummy, [], {}, 0 ) ||
+				R( Rc, false, Dummy, [], {}, 0 ) ||
+				%Rack
 				Rack( InitRack( RackSize ) ) ||
+				%Sluices
 				S( S0, false, Dummy, outer_open, false ) ||
 				S( S1, false, Dummy, outer_open, false ) ||
+				%Projector
 				P( false, Dummy )
 			)
-		%)
 	);
