@@ -1,4 +1,4 @@
 % This formula expresses that
 % A Wafer will eventually exit the system treated.
 
-[true*] forall w: Wafer . [DepositWafer(w)] true
+[true*] forall w: Wafer . [RobotToOutput(w)] true

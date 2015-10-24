@@ -1,4 +1,0 @@
-% This formula expresses that
-% only one sluice door can be open at the same time.
-
-forall s: SluiceID . [true* . OpenInnerDoor(s) . (!CloseInnerDoor(s))* . OpenOuterDoor(s)] false
