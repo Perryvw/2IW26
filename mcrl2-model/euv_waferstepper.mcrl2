@@ -139,7 +139,7 @@ proc
 			)
 			<> (
 				( input != [] && counter < NumSluices ) -> RobotFromInput( head( input ) ) . RobotReset( rID ) . R( rID, true, head(input), tail(input), output, counter ) +
-				sum w2:Wafer, s:SluiceID . S2R_R( rID, s, w2 ) . RReset_D( rID ) . R( rID, true, w2, input, output, counter - 1 )
+				sum w2:Wafer, s:SluiceID . S2R_R( rID, s, w2 ) . RReset_D( rID ) . R( rID, true, w2, input, output, Int2Nat(counter - 1) )
 			)
 		) + 
 		( rID == Rb ) -> (
