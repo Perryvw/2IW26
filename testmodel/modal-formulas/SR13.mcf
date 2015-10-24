@@ -1,0 +1,5 @@
+% This formula expresses that
+% R13 Robot A&B should only try to take wafers from the rack if 
+% there are wafers available.
+
+% TODO

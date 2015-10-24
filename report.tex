@@ -142,33 +142,31 @@
 \item PumpVacuum(N) - Make a vacuum in sluice N.
 \item ReleaseVacuum(N) - Release the vacuum in sluice N.
 
-\item RobotFromInput - Robot A picks up a wafer from the input rack.
-\item RobotToOutput - Robot A deposits a wafer on the output rack.
+\item RobotFromInput( W ) - Robot A picks up wafer W from the input rack.
+\item RobotToOutput( W ) - Robot A deposits wafer W on the output rack.
 
-\item RobotToSluice( R, S ) - Robot R deposits the wafer it is holding in sluice S.
-\item RobotFromSluice( R, S ) - Robot R picks up a wafer from sluice S.
+\item RobotToSluice( R, S, W ) - Robot R deposits wafer W it is holding in sluice S.
+\item RobotFromSluice( R, S, W ) - Robot R picks up wafer W from sluice S.
 
-\item RobotToRack( R, P ) - Robot R deposits the wafer it is holding to position P on the buffer rack.
-\item RobotFromRack( R, P ) - Robot R takes a wafer from position P on the buffer rack.
+\item RobotToRack( R, P, W ) - Robot R deposits wafer W it is holding to position P on the buffer rack.
+\item RobotFromRack( R, P, W ) - Robot R takes wafer W from position P on the buffer rack.
 
-\item RobotToProjector - Robot C deposits the wafer it is holding on the projector.
-\item RobotFromProjector - Robot C picks up the wafer that is currently on the projector.
+\item RobotToProjector( W ) - Robot C deposits wafer W it is holding on the projector.
+\item RobotFromProjector( W ) - Robot C picks up wafer W that is currently on the projector.
 
-\item TreatWafer - The projector treats a wafer.
+\item TreatWafer( W ) - The projector treats wafer W.
 \end{itemize}
 
-	\section{System properties}
+	\section{System events}
 	\begin{itemize}
-\item IsOuterDoorOpen(N) - True if the outer door of sluice N is open false otherwise.
-\item IsInnerDoorOpen(N) - True if the outer door of sluice N is open false otherwise.
-\item IsVacuum(N) - True if there is currently a vacuum in sluice N false otherwise.
-\item IsWaferInSluice(N) - True if there is a wafer is sluice N false otherwise
-\item IsRobotInSluice(N) - True if there is a robot in sluice N false otherwise
-\item IsRobotAccessingRack(R, N) -  True if robot R is currently accesing rack N.
-\item IsWaferOnRack(R, P) - True if there is a wafer in rack R at position P false otherwise
-\item IsWaferTreated - True if the wafer in the projector has been treated false otherwise
-\item IsSluiceBroken(N) - Sluice N has failed to respond to a user action and will be marked as broken.
-\item IsWaferInProjector - Whether there is a wafer in projector or not.
+\item RobotReset( R ) - Robot R has reset to its default position.
+\item OuterDoorOpened( S ) - The outer door of sluice S has completely opened.
+\item OuterDoorClosed( S ) - The outer door of sluice S has completely closed.
+\item InnerDoorOpened( S ) - The inner door of sluice S has completely opened.
+\item InnerDoorClosed( S ) - The inner door of sluice S has completely closed.
+\item VacuumDone( S ) - The vacuum in sluice S is complete.
+\item VacuumReleased( S ) - The vacuum in sluice S is completely released.
+\item WaferTreated( W ) - Wafer W is treated by the projector.
 	\end{itemize}
 	
 	\chapter{Requirements in terms of interactions}
