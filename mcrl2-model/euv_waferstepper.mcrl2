@@ -1,11 +1,22 @@
 %===========================================================================
+% Sort definitions
+%===========================================================================
+sort 
+	Wafer = struct wafer( id:Int, treated:Bool );
+	WaferSet = Set( Wafer );
+	WaferList = List( Wafer );
+	RobotID = struct Ra | Rb | Rc;
+	SluiceID = struct S0 | S1;
+	SluiceDoorState = struct inner_open | closed | outer_open; 
+
+%===========================================================================
 % Parameters
 %===========================================================================
 map RackSize: Nat;
 eqn RackSize = 3;
 
 map NumWafers: Nat;
-eqn NumWafers = 1;
+eqn NumWafers = 3;
 
 map NumSluices: Nat;
 eqn NumSluices = 2;
@@ -18,16 +29,6 @@ eqn inputList = InitWaferList( NumWafers );
 
 map output : Set( Wafer );
 eqn output = {};
-
-%===========================================================================
-% Sort definitions
-%===========================================================================
-sort Wafer = struct wafer( id:Int, treated:Bool );
-sort WaferSet = Set( Wafer );
-sort WaferList = List( Wafer );
-sort RobotID = struct Ra | Rb | Rc;
-sort SluiceID = struct S0 | S1;
-sort SluiceDoorState = struct inner_open | closed | outer_open; 
 
 %===========================================================================
 % Mapping definitions
@@ -52,12 +53,6 @@ eqn
 	( n >= 0 && n < RackSize ) -> OnRack( n ) = true;
 	( n < 0 || n >= RackSize ) -> OnRack( n ) = false;
 
-%Generate a list of wafers with incremental ids for the input
-map  InitWaferList: Nat -> WaferList;
-var  n : Nat;
-eqn  InitWaferList(0)     = [];
-0 < n -> InitWaferList(n) = wafer( n, false ) |> InitWaferList( max( n - 1, 0 ) );
-
 %Get the treated version of some wafer
 map TreatedWafer : Wafer -> Wafer;
 var n:Int;
@@ -71,14 +66,20 @@ var l:List( Wafer );
 	p:Int;
 	w:Wafer;
 eqn PutInList([], p, w) = [];
-	(#l > 0 && #l-1 == RackSize - p - 1) -> PutInList( l, p, w ) = w |> PutInList( tail( l ), p, w );
-	(#l > 0 && #l-1 != RackSize - p - 1) -> PutInList( l, p, w ) = head( l ) |> PutInList( tail( l ), p, w );
+	(#l > 0 && #l == RackSize - p) -> PutInList( l, p, w ) = w |> PutInList( tail( l ), p, w );
+	(#l > 0 && #l != RackSize - p) -> PutInList( l, p, w ) = head( l ) |> PutInList( tail( l ), p, w );
 
 %Initalise a list that represents the rack
 map InitRack : Nat -> List( Wafer );
 var n:Nat;
 eqn InitRack( 0 ) = [];
 0 < n -> InitRack( n ) = InitRack( max( n - 1, 0 ) ) <| Dummy;
+
+%Generate a list of wafers with incremental ids for the input
+map  InitWaferList: Nat -> WaferList;
+var  n : Nat;
+eqn  InitWaferList(0)     = [];
+0 < n -> InitWaferList(n) = wafer( n, false ) |> InitWaferList( max( n - 1, 0 ) );
 
 %===========================================================================
 % Actions
@@ -130,7 +131,7 @@ act
 %===========================================================================
 proc
 	%RobotHandler
-	R( rID:RobotID, occupied:Bool, w:Wafer, input:WaferList, output:WaferSet, counter:Int ) =
+	R( rID:RobotID, occupied:Bool, w:Wafer, input:WaferList, output:WaferSet, counter:Nat ) =
 		( rID == Ra ) -> (
 			occupied -> (
 				( IsTreated( w ) ) -> RobotToOutput( w ) . RobotReset( rID ) . R( rID, false, Dummy, input, output + {w}, counter )

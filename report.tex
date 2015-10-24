@@ -250,37 +250,53 @@
 	
 	A schematic view of this system can also be found in figure \ref{fig:components}.
 	
-	\section{Responsibilities}
-	The purpose of this separation into components is to separate responsibilities of the system, increasing the cohesion and decreasing the coupling of the system. The different actions of the system can be divided over the different components to establish this separation of responsibilities.
-	
-	\subsection*{SluiceManager}
-	\begin{itemize}
-		\item OpenOuterDoor
-		\item CloseOuterDoor
-		\item OpenInnerDoor
-		\item CloseInnerDoor
-		\item PumpVacuum
-		\item ReleaseVacuum
-	\end{itemize}
-	
-	\subsection*{RobotManager}
-	\begin{itemize}
-		\item RobotFromInput
-		\item RobotToOutput
-		\item RobotToSluice
-		\item RobotFromSluice
-		\item RobotToRack
-		\item RobotFromRack
-		\item RobotToProjector
-		\item RobotFromProjector
-	\end{itemize}		
-	
-	\subsection*{ProjectorManager}
-	\begin{itemize}
-		\item TreatWafer
-	\end{itemize}
-	
 	\section{Formal model}
+	%Sorts
+	\textbf{sort}\\
+	\phantom{----} Wafer = \textbf{struct} \emph{wafer}$( id:\mathbb{Z}, treated:\mathbb{B} )$;\\
+	\phantom{----} WaferSet = Set( Wafer );\\
+	\phantom{----} WaferList = List( Wafer );\\
+	\phantom{----} RobotID = \textbf{struct} $R_a | R_b | R_c$;\\
+	\phantom{----} SluiceID = \textbf{struct} $S_0 | S_1$;\\
+	\phantom{----} SluiceDoorState = \textbf{struct} $inner\_open|closed|outer\_open$;\\
+	\\
+	%Params
+	\textbf{eqn}\\
+	\phantom{----} RackSize = 2;\\
+	\phantom{----} NumWafers = $X$;\\
+	\phantom{----} NumSluices = 2;\\
+	\phantom{----} Dummy = \emph{wafer}$( -1, false)$;\\
+	\\
+	%Helper equations
+	\textbf{eqn}\\
+	\phantom{----} IsTreated( \emph{wafer}$( w, b )$ ) = $b$;\hfill for all $w \in \mathbb{Z}, b \in \mathbb{B}$\\
+	\phantom{----} IsDummy(  \emph{wafer}$( w, b )$ ) = $w == -1$;\hfill for all $w \in \mathbb{Z}, b \in \mathbb{B}$\\
+	\phantom{----} OnRack$( p ) = 0 \leq p < \text{RackSize}$;\hfill for all $p \in \mathbb{N}$\\
+	\phantom{----} TreatedWafer(  \emph{wafer}$( w, b )$ ) =  \emph{wafer}$( w, true )$;\hfill for all $w \in \mathbb{Z}, b \in \mathbb{B}$\\
+	\\
+	\phantom{----} \emph{for all $l \in \text{WaferList}, p \in \mathbb{N}, w \in \text{Wafer}$, where OnRack($p$) = true}:\\
+	\phantom{----} PutInList$( l, p, w )$ = [];\hfill if $l=[]$\\
+	\phantom{----} PutInList$( l, p, w )$ = $w$ $|>$ PutInList$( tail( l ), p, w )$;\hfill if $0 < \#l \land \#l = \text{RackSize} - p$\\
+	\phantom{----} PutInList$( l, p, w )$ = $ head( l )$ $|>$ PutInList$( tail( l ), p, w )$;\hfill if $0 < \#l \land \#l \neq \text{RackSize} - p$\\
+	\\
+	\phantom{----} InitRack( 0 ) = [];\\
+	\phantom{----} InitRack( n ) = InitRack( n - 1 ) $<|$ Dummy;\hfill for all $n \in \mathbb{N}$\\
+	\\
+	\phantom{----} InitWaferList( 0 ) = [];\\
+	\phantom{----} InitWaferList( n ) = InitWaferList( n - 1 ) $<|$ \emph{wafer}($n$, \emph{false});\hfill for all $n \in \mathbb{N}$\\
+	\\
+	%Processes
+	\textbf{proc}\\
+	\phantom{----} R( rID:RobotID, occupied:$\mathbb{B}$, $w$:Wafer, $in$:WaferList, $out$:WaferSet, $c$:$\mathbb{N}$ ) =\\
+	\phantom{--------} rID = $R_a \rightarrow$\\
+	\phantom{-----------} occupied $\rightarrow$\\
+	\phantom{--------------} IsTreated( $w$ ) $\rightarrow$ RobotToOutput( $w$ )$\cdot$RobotReset( rID )$\cdot$R( rID, $false$, Dummy, $in$, $out + \{w\}$, $c$ )\\
+	\phantom{--------------} $<> \sum\nolimits_{s \in SluiceID}\cdot$R2S\_R( rID, $s$, $w$ )$\cdot$RReset\_O( rID )$\cdot$R( rID, $false$, Dummy, $in$, $out$, $c + 1$ )\\
+	\phantom{-----------} $<>$\\
+	\phantom{--------------} $in \neq [] \land c < NumSluices \rightarrow$ RobotFromInput( head($in$) )$\cdot$RobotReset( rID ))$\cdot$R( rID, $true$, head($in$), tail($in$), $out$, $c$ ) + \\
+	\phantom{--------------} $\sum\nolimits_{w_2 \in Wafer, s \in SluiceID}$ S2R\_R( rID, $s$, $w_2$)$\cdot$RReset\_D( rID )$\cdot$R(rID, $true$, $w_2$, $in$, $out$, $c-1$)\\
+	\phantom{-----------} $+$\\
+	
 	
 
 \end{document} 
