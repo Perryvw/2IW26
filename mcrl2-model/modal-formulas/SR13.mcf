@@ -1,5 +1,5 @@
-% This formula expresses that
-% R13 Robot A&B should only try to take wafers from the rack if 
-% there are wafers available.
+% This formula expresses SR13.
+% RobotFromRack( R, P ) can only happen if IsWaferOnRack( P ) is true for the same P.
 
-% TODO
+[true*] forall p:Nat, w:Wafer. [	((!RobotToRack( Rb, p ,w ))*.RobotFromRack( Rc, p, w )) 
+					+ ((!RobotToRack( Rc, p ,w ))*.RobotFromRack( Rb, p, w ))]false

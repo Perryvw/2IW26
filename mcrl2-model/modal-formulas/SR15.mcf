@@ -1,7 +1,4 @@
-% This formula expresses that
-% RobotTakeWafer(C, p) or RobotDepositWafer(C, p) can only 
-% happen if robotAccess-ingRack(B,C Rack) is false.
-% R15 Robot C can not access the same spot on the rack as 
-% Robot B at the same time.
-
+% This formula expresses SR15.
+% RobotTakeWafer(C, p) or RobotDepositWafer(C, p) can only happen if robotAccessingRack(B,C_Rack) is false.
 % TODO
+[true*] forall p:Nat. [RobotTakeWafer( Rc , p )]

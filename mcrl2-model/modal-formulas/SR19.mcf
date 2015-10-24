@@ -1,5 +1,4 @@
-% This formula expresses that
-% If the projection is done, 
-% Robot C should take the wafer from the projection platform.
+% This formula expresses SR19.
+% treatWafer can only happen after robotCTreatWafer if no robotCRetrieve happened after that.
 
-[true*] forall w:Wafer. [TreatWafer( w ). true*. P2R( w )]true
+[true*] forall w:Wafer. [RobotToProjector( w ).true*.RobotFromProjector( w ).true*.TreatWafer( w )]false

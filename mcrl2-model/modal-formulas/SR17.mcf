@@ -1,7 +1,4 @@
-% This formula expresses that
+% This formula expresses SR17.
 % robotCRetreiveWafer can only happen if waferTreated is true.
 
-[true*] forall w:Wafer. [R2P( w ).(!TreatWafer( w ))*.P2R( w )]false
-
-% dont know what this is:
-% [true*] forall w:Wafer. [R2P( w ).(!P2R( w ))*.R2P( w )] false
+[true*] forall w:Wafer. [RobotToProjector( w ).(!TreatWafer( w ))*.RobotFromProjector( w )]false

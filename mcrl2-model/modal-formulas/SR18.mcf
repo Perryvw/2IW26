@@ -1,4 +1,3 @@
-% This formula expresses that
-% Robot C cannot put a wafer on an occupied position on the rack
+% This formula expresses SR18.
 
-[true*] forall p:Nat, w:Wafer, r:RobotID. [R2Rack( r, p, w ).(!Rack2R( r, p, w ))*.R2Rack( r, p, w )]false
+[true*] forall w:Wafer. forall p:Nat. [RobotToRack( Rc, p, w).(!RobotFromRack( Rb, p, w))*.RobotToRack( Rc, p, w)]false

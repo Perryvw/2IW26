@@ -1,4 +1,16 @@
-% openOuterDoor(N), closeOuterDoor(N), openInnerDoor(N), closeInnerDoor(N), pump-
-% Vacuum(N), releaseVacuum(N), robotWaferInSluice(R,N),robotWaferFromSluice(R,N),
-% outerDoorOpened(N),outerDoorClosed(N),innerDoorOpened(N),innerDoorClosed(N),vacuumDone(N) 
-% and vacuumReleased(N) can only happen if sluiceBroken(N) is false.
+% This formula expresses SR12.
+% openOuterDoor(N), closeOuterDoor(N), openInnerDoor(N), 
+% closeInnerDoor(N), pumpVacuum(N), releaseVacuum(N), 
+% robotWaferInSluice(R,N),robotWaferFromSluice(R,N), 
+% outerDoorOpened(N), outerDoorClosed(N),innerDoorOpened(N),
+% innerDoorClosed(N),vacuumDone(N) and vacuumReleased(N) 
+% can only happen if sluiceBroken(N) is false.
+
+[true*] forall n:Nat. [SluiceBroken(n).(CloseInnerDoor(n) 
+										+ CloseOuterDoor(n)
+										+ OpenInnerDoor(n)
+										+ OpenInnerDoor(n)
+										+ OpenOuterDoor(n)
+										+ PumpVacuum(n)
+										+ ReleaseVacuum(n)
+										+ SluiceBroken(n))]false
