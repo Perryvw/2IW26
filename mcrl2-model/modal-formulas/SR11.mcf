@@ -2,4 +2,4 @@
 % RobotToRack( R, P ) can only happen after another RobotToRack( R, P ) 
 % with the same P, if a RobotFromRack( R, P ) has happened with the same P.
 
-[true*] forall p:Nat, r:RobotID, w:Wafer [RobotToRack( r, p, w ).(!RobotFromRack( r, p, w )).RobotToRack( r, p, w )]false
+[true*] forall p:Nat, r:RobotID, w:Wafer. [RobotToRack( r, p, w ).(!RobotFromRack( r, p, w )).RobotToRack( r, p, w )]false

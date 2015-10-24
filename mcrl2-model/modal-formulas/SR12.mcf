@@ -6,11 +6,4 @@
 % innerDoorClosed(N),vacuumDone(N) and vacuumReleased(N) 
 % can only happen if sluiceBroken(N) is false.
 
-[true*] forall n:Nat. [SluiceBroken(n).(CloseInnerDoor(n) 
-										+ CloseOuterDoor(n)
-										+ OpenInnerDoor(n)
-										+ OpenInnerDoor(n)
-										+ OpenOuterDoor(n)
-										+ PumpVacuum(n)
-										+ ReleaseVacuum(n)
-										+ SluiceBroken(n))]false
+[true*] forall s:SluiceID. [SluiceBroken(s).(CloseInnerDoor(s) + CloseOuterDoor(s) + OpenInnerDoor(s) + OpenInnerDoor(s) + OpenOuterDoor(s) + PumpVacuum(s) + ReleaseVacuum(s) + SluiceBroken(s))]false
