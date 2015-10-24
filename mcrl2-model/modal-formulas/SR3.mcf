@@ -1,0 +1,4 @@
+% This formula expresses that
+% The outer sluice door can only open if there is normal air pressure inside the sluice.
+
+[true*] forall s: SluiceID . [ PumpVacuum(s) . (!ReleaseVacuum(s))* .  OpenOuterDoor(s)] true

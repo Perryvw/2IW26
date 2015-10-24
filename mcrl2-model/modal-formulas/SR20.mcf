@@ -1,0 +1,5 @@
+% This formula expresses that
+% a robot cannot put a wafer on a full rack
+% TODO: Rack sizes
+
+[true*] forall w:Wafer. forall r:RobotID. [R2Rack( r, w )]false

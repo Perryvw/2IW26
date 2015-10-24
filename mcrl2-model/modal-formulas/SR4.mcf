@@ -1,0 +1,4 @@
+% This formula expresses that
+% The inner sluice door can only open if there is a vacuum inside the sluice.
+
+forall s: SluiceID . [true* . ReleaseVacuum(s) . (!PumpVacuum(s))* .  OpenInnerDoor(s)] true
