@@ -1,8 +1,11 @@
 map RackSize: Nat;
-eqn RackSize = 2;
+eqn RackSize = 3;
 
 map NumWafers: Nat;
-eqn NumWafers = 4;
+eqn NumWafers = 5;
+
+map NumSluices: Nat;
+eqn NumSluices = 2;
 
 map test:Int;
 
@@ -100,33 +103,32 @@ eqn PutInList([], p, w) = [];
 
 proc
 	%RobotHandler
-	R( rID:RobotID, occupied:Bool, w:Wafer, input:WaferList, output:WaferSet ) =
+	R( rID:RobotID, occupied:Bool, w:Wafer, input:WaferList, output:WaferSet, counter:Int ) =
 		( rID == Ra ) -> (
 			occupied -> (
-				( IsTreated( w ) ) -> RobotToOutput( w ) . RobotReset( rID ) . R( rID, false, Dummy, input, output + {w} )
-				<> ( sum s:SluiceID . R2S_R( rID, s, w ) . RReset_O( rID ) . R( rID, false, Dummy, input, output ) +
-				RobotToInput( w ) . RobotReset( rID ) . R( rID, false, Dummy, input <| w, output ) )
+				( IsTreated( w ) ) -> RobotToOutput( w ) . RobotReset( rID ) . R( rID, false, Dummy, input, output + {w}, counter )
+				<> ( sum s:SluiceID . R2S_R( rID, s, w ) . RReset_O( rID ) . R( rID, false, Dummy, input, output, counter + 1 ) )
 			)
 			<> (
-				( input != [] ) -> RobotFromInput( rID, head( input ) ) . RobotReset( rID ) . R( rID, true, head(input), tail(input), output ) +
-				sum w2:Wafer, s:SluiceID . S2R_R( rID, s, w2 ) . RReset_D( rID ) . R( rID, true, w2, input, output )
+				( input != [] && counter < NumSluices ) -> RobotFromInput( rID, head( input ) ) . RobotReset( rID ) . R( rID, true, head(input), tail(input), output, counter ) +
+				sum w2:Wafer, s:SluiceID . S2R_R( rID, s, w2 ) . RReset_D( rID ) . R( rID, true, w2, input, output, counter - 1 )
 			)
 		) + 
 		( rID == Rb ) -> (
 			occupied -> (
-				( IsTreated( w ) ) -> sum s:SluiceID . R2S_R( rID, s, w ) . RReset_O( rID ) . R( rID, false, Dummy, input, output )
-				<> sum p:Nat . ( OnRack( p ) ) -> R2Rack_R( rID, p, w ) . RReset_O( rID ) . R( rID, false, Dummy, input, output )
+				( IsTreated( w ) ) -> sum s:SluiceID . R2S_R( rID, s, w ) . RReset_O( rID ) . R( rID, false, Dummy, input, output, counter )
+				<> sum p:Nat . ( OnRack( p ) ) -> R2Rack_R( rID, p, w ) . RReset_O( rID ) . R( rID, false, Dummy, input, output, counter )
 			)
 			<> (
-				sum w2:Wafer, s:SluiceID . S2R_R( rID, s, w2 ) . RReset_D( rID ) . R( rID, true, w2, input, output ) +
-				sum w2:Wafer, p:Nat . ( IsTreated( w2 ) && OnRack( p ) ) -> Rack2R_R( rID, p, w2 ) . RReset_D( rID ) . R( rID, true, w2, input, output )
+				sum w2:Wafer, s:SluiceID . S2R_R( rID, s, w2 ) . RReset_D( rID ) . R( rID, true, w2, input, output, counter ) +
+				sum w2:Wafer, p:Nat . ( IsTreated( w2 ) && OnRack( p ) ) -> Rack2R_R( rID, p, w2 ) . RReset_D( rID ) . R( rID, true, w2, input, output, counter )
 			)
 		) +
 		( rID == Rc ) -> (
 			occupied -> 
-				( R2P_R( w ) . RReset_O( rID ) . P2R_R( TreatedWafer( w ) ) . RReset_D( rID ) . sum p:Nat . ( OnRack( p ) ) -> R2Rack_R( rID, p, TreatedWafer( w ) ) . RReset_O( rID ) . R( rID, false, Dummy, input, output ) )
+				( R2P_R( w ) . RReset_O( rID ) . P2R_R( TreatedWafer( w ) ) . RReset_D( rID ) . sum p:Nat . ( OnRack( p ) ) -> R2Rack_R( rID, p, TreatedWafer( w ) ) . RReset_O( rID ) . R( rID, false, Dummy, input, output, counter ) )
 			<>
-				sum w2:Wafer, p:Nat . ( !IsTreated( w2 ) && OnRack( p ) ) -> Rack2R_R( rID, p, w2 ) . RReset_D( rID ) . R( rID, true, w2, input, output )
+				sum w2:Wafer, p:Nat . ( !IsTreated( w2 ) && OnRack( p ) ) -> Rack2R_R( rID, p, w2 ) . RReset_D( rID ) . R( rID, true, w2, input, output, counter )
 		)
 	;
 
@@ -179,9 +181,9 @@ init
 		RobotReset, WaferTreated, OuterDoorOpened, OuterDoorClosed, InnerDoorOpened, InnerDoorClosed, VacuumDone, VacuumReleased },
 			comm({ R2S_R|R2S_S -> RobotToSluice, S2R_S|S2R_R -> RobotFromSluice, R2P_R|R2P_P -> RobotToProjector, P2R_P|P2R_R -> RobotFromProjector, 
 				R2Rack_R|R2Rack_Rack -> RobotToRack, Rack2R_Rack|Rack2R_R -> RobotFromRack, RReset_O|RReset_D -> RobotReset },
-				R( Ra, false, Dummy, inputList, output ) ||
-				R( Rb, false, Dummy, inputList, output ) ||
-				R( Rc, false, Dummy, inputList, output ) ||
+				R( Ra, false, Dummy, inputList, output, 0 ) ||
+				R( Rb, false, Dummy, inputList, output, 0 ) ||
+				R( Rc, false, Dummy, inputList, output, 0 ) ||
 				Rack( InitRack( RackSize ) ) ||
 				S( S0, false, Dummy, outer_open, false ) ||
 				S( S1, false, Dummy, outer_open, false ) ||
