@@ -1,0 +1,6 @@
+% This formula expresses that
+% R16 If there is no wafer on the projection platform Robot C 
+% should try to take a wafer
+% from the rack and place it on the projection platform.
+
+[true*] forall w:Wafer. [P2R( w ).true*.R2Rack( Rb, w ).true*.R2P( w )]true

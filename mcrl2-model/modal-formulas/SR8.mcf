@@ -1,0 +1,4 @@
+% This formula expresses that
+% Robot B may only move to a sluice if the inside door of the target sluice is open.
+
+[true*] forall s : SluiceID, w: Wafer . [CloseOuterDoor(s) . (!OpenOuterDoor(s))* . TakeWafer(Rb,w)] false
