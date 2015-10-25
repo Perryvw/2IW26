@@ -1,3 +1,3 @@
 % This formula expresses SR16.
 
-[true*] forall w:Wafer. [RobotToProjector( w ).(!RobotFromProjector( w ))*.RobotToProjector( w )]false
+[true*] forall w,w2:Wafer. [RobotToProjector( w ).(!RobotFromProjector( w ))*.RobotToProjector( w2 )]false

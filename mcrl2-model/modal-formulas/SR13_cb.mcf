@@ -1,3 +1,4 @@
 % This formula expresses SR13.
 % RobotFromRack( R, P ) can only happen if IsWaferOnRack( P ) is true for the same P.
-% TODO
+
+[true*] forall p:Nat, w:Wafer. [(!RobotToRack( Rc, p, w ))*.RobotFromRack( Rb, p, w )]false
