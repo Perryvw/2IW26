@@ -224,8 +224,8 @@
 	\section{Inside robot requirements}
 	\begin{itemize}
 		\reqb{SR15}{RobotTakeWafer(C, p) or RobotDepositWafer(C, p) can only happen if robotAccessingRack(B,C\_Rack) is false. }
-		\reqb{SR16}{robotCRetreiveWafer can only happen if waferInProjector is false.}
-		\reqb{SR17}{robotCRetreiveWafer can only happen if waferTreated is true.}
+		\reqb{SR16}{RobotToProjector( W ) can only happen twice in a row if RobotFromProjector( W ) happens in between.}
+		\reqb{SR17}{RobotFromProjector( W ) can only happen if TreatWafer ( W ) happens before.}
 		\reqb{SR18}{robotDepositWafer(C, N) can only happen if waferOnRack(C\_Rack, P) is true for some P.}
 	\end{itemize}
 	\section{Projector requirements}
