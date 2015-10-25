@@ -20,6 +20,7 @@
 \usepackage{colortbl}
 \usepackage{amsfonts}
 \newcounter{counter}
+\usepackage{listings}
 
 %\linenumbers
 \modulolinenumbers[5]
@@ -67,7 +68,7 @@
 		\caption{A schematic overview of the system}
 		\label{fig:overview}
 	\end{figure}
-	The Extreme Ultraviolet (EUV) Wafer Stepper is a system developed by ASML to treat silicon wafers. Treating a wafer is the act of projecting an image with ultra violet light onto a silicon wafer. Since ultra violet radiation is absorbed by air, this treatment has to happen in a vacuum to ensure the accuracy of the projection. This means wafers will have to enter and exit the system through airlocks, also referred to as sluices. One robot will move wafers from the input to the airlocks or from the airlocks to the output for treated wafers from outside the vacuum chamber. One robot will move wafers from the airlocks to a buffer rack inside the vacuum chamber and vice versa for treated wafers. A last robot, located inside the vacuum chamber, takes wafers from the internal buffer rack to the projector and back once the projector is done. A schematic overview of the system can be found in figure \ref{fig:overview}.
+	The Extreme Ultraviolet (EUV) Wafer Stepper is a system developed by ASML to treat silicon wafers for the manufacturing of integrated circuits. Treating a wafer is the act of projecting an image with ultra violet light onto a silicon wafer. Since ultra violet radiation is absorbed by air, this treatment has to happen in a vacuum to ensure the accuracy of the projection. This means wafers will have to enter and exit the system through airlocks, also referred to as sluices. One robot will move wafers from the input to the airlocks or from the airlocks to the output for treated wafers from outside the vacuum chamber. One robot will move wafers from the airlocks to a buffer rack inside the vacuum chamber and vice versa for treated wafers. A last robot, located inside the vacuum chamber, takes wafers from the internal buffer rack to the projector and back once the projector is done. A schematic overview of the system can be found in figure \ref{fig:overview}.
 	\section{System components}
 	The system can be broken down into individual components to be considered by the software. These components are the following:
 	\begin{itemize}
@@ -246,6 +247,7 @@
 	\item \textbf{SluiceManager} - This component manages the sluices, it runs parallel for each sluice. The purpose of this component is to control the individual airlocks.
 	\item \textbf{RobotManager} - This component manages the different robots in the system, and runs a parallel process for each robot.
 	\item \textbf{ProjectorManager} - The projector is managed by this component.
+	\item \textbf{RackManager} - This component's purpose is to monitor the rack.
 	\end{itemize}
 	
 	A schematic view of this system can also be found in figure \ref{fig:components}.
@@ -286,17 +288,101 @@
 	\phantom{----} InitWaferList( n ) = InitWaferList( n - 1 ) $<|$ \emph{wafer}($n$, \emph{false});\hfill for all $n \in \mathbb{N}$\\
 	\\
 	%Processes
+	{\small
+	%Robot
 	\textbf{proc}\\
-	\phantom{----} R( rID:RobotID, occupied:$\mathbb{B}$, $w$:Wafer, $in$:WaferList, $out$:WaferSet, $c$:$\mathbb{N}$ ) =\\
-	\phantom{--------} rID = $R_a \rightarrow$\\
-	\phantom{-----------} occupied $\rightarrow$\\
-	\phantom{--------------} IsTreated( $w$ ) $\rightarrow$ RobotToOutput( $w$ )$\cdot$RobotReset( rID )$\cdot$R( rID, $false$, Dummy, $in$, $out + \{w\}$, $c$ )\\
-	\phantom{--------------} $<> \sum\nolimits_{s \in SluiceID}\cdot$R2S\_R( rID, $s$, $w$ )$\cdot$RReset\_O( rID )$\cdot$R( rID, $false$, Dummy, $in$, $out$, $c + 1$ )\\
-	\phantom{-----------} $<>$\\
-	\phantom{--------------} $in \neq [] \land c < NumSluices \rightarrow$ RobotFromInput( head($in$) )$\cdot$RobotReset( rID ))$\cdot$R( rID, $true$, head($in$), tail($in$), $out$, $c$ ) + \\
-	\phantom{--------------} $\sum\nolimits_{w_2 \in Wafer, s \in SluiceID}$ S2R\_R( rID, $s$, $w_2$)$\cdot$RReset\_D( rID )$\cdot$R(rID, $true$, $w_2$, $in$, $out$, $c-1$)\\
-	\phantom{-----------} $+$\\
+	\phantom{---} R( \emph{rID}:RobotID, $occupied$:$\mathbb{B}$, $w$:Wafer, $in$:WaferList, $out$:WaferSet, $c$:$\mathbb{N}$ ) =\\
+	\phantom{-------} \emph{rID} = $R_a \rightarrow$\\
+	\phantom{----------} $occupied$ $\rightarrow$\\
+	\phantom{--------------} IsTreated($w$)$\rightarrow$RobotToOutput($w$)$\cdot$RobotReset(\emph{rID})$\cdot$R(\emph{rID},$false$,Dummy,$in$,$out$+$\{w\}$,$c$)\\
+	\phantom{--------------} $\Diamond \sum\nolimits_{s \in \text{SluiceID}}\cdot$R2S\_R(\emph{rID},$s$,$w$)$\cdot$RReset\_O(\emph{rID})$\cdot$R(\emph{rID},$false$, Dummy,$in$,$out$,$c$+$1$)\\
+	\phantom{----------} $\Diamond$\\
+	\phantom{--------------} $in \neq [] \land c < NumSluices \rightarrow$ ( RobotFromInput( head($in$) )$\cdot$\\
+	\phantom{---------------------} RobotReset(\emph{rID}))$\cdot$R(\emph{rID},$true$,head($in$),tail($in$),$out$,$c$) ) \\
+	\phantom{--------------} + $\sum\nolimits_{w_2 \in \text{Wafer}, s \in \text{SluiceID}}$S2R\_R(\emph{rID},$s$,$w_2$)$\cdot$RReset\_D(\emph{rID})$\cdot$R(\emph{rID}, $true$,$w_2$,$in$,$out$,$c$-$1$)\\
+	\\
+	\phantom{-------} + \emph{rID} = $R_b \rightarrow$\\
+	\phantom{----------} $occupied$ $\rightarrow$\\
+	\phantom{--------------} IsTreated($w$)$\rightarrow\sum\nolimits_{s\in\text{SluiceID}}$R2S\_R(\emph{rID},$s$,$w$)$\cdot$RReset\_O(\emph{rID})$\cdot$R(\emph{rID},\emph{false},Dummy,$in$,$out$,$c$)\\
+	\phantom{--------------} $\Diamond \sum\nolimits_{p\in \mathbb{N}}$OnRack($p$)$\rightarrow$R2Rack\_R(\emph{rID},$p$,$w$)$\cdot$RReset\_O(\emph{rID})$\cdot$R(\emph{rID},\emph{false},Dummy,$in$,$out$,$c$)
+	\phantom{----------}  $\Diamond$\\
+	\phantom{--------------} $\sum\nolimits_{w_2 \in \text{Wafer}, s \in \text{SluiceID}}$S2R\_R(\emph{rID},$s$,$w_2$)$\cdot$RReset\_D(\emph{rID})$\cdot$R(rID,\emph{true},$w_2$,$in$,$out$,$c$)\\
+	\phantom{--------------} +$\sum\nolimits_{w_2 \in \text{Wafer}, p \in \mathbb{N}}$IsTreated($w_2$)$\land$OnRack($p$)$\rightarrow$Rack2R\_R(\emph{rID},$p$,$w_2$)$\cdot$\\
+	\phantom{-----------------------------} RReset(\emph{rID})$\cdot$R(\emph{rID},\emph{true},$w_2$,$in$,$out$,$c$)\\
+	\\
+	\phantom{-------} + \emph{rID} = $R_c \rightarrow$\\
+	\phantom{----------} $occupied$ $\rightarrow$\\
+	\phantom{--------------} R2P\_R($w$)$\cdot$RReset\_O(\emph{rID})$\cdot$P2R\_R(TreatedWafer($w$))$\cdot$RReset\_D(\emph{rID})$\cdot\sum\nolimits_{p \in \mathbb{N}}$OnRack($p$)$\rightarrow$\\
+	\phantom{------------------} R2Rack\_R(\emph{rID},$p$,TreatedWafer($w$))$\cdot$RReset\_O(\emph{rID})$\cdot$R(\emph{rID},\emph{false},Dummy,$in$,$out$,$c$)\\
+	\phantom{----------} $\Diamond$\\
+	\phantom{--------------} +$\sum\nolimits_{w_2 \in \text{Wafer}, p \in \mathbb{N}}\neg$IsTreated($w_2$)$\land$OnRack($p$)$\rightarrow$Rack2R\_R(\emph{rID},$p$,$w_2$)$\cdot$\\
+	\phantom{-----------------------------} RReset\_D(\emph{rID})$\cdot$R(\emph{rID},\emph{true},$w_2$,$in$,$out$,$c$);
+	}\\
+	\\
+	%Sluice
+	{\small
+	\phantom{---} S( $id$:SluiceID, $occupied$:$\mathbb{B}$, $w$:Wafer, $door$:DoorState, $broken$:$\mathbb{B}$ ) =\\
+	\phantom{------} $\neg broken \rightarrow$\\
+	\phantom{---------} $\neg occupied \rightarrow$\\
+	\phantom{-------------} $door=outer\_open \rightarrow\sum\nolimits_{w_2\in \text{Wafer}}$R2S\_S($R_a$,$id$,$w_2$)$\cdot$RReset\_D($R_a$)$\cdot$CloseOuterDoor($id$)$\cdot$\\
+	\phantom{-----------------} OuterDoorClosed($id$)$\cdot$PumpVacuum($id$)$\cdot$VacuumDone($id$)$\cdot$S($id$,\emph{true},$w_2$,$closed$,\emph{false})\\
+	\phantom{-------------} + $door=inner\_open \rightarrow\sum\nolimits_{w_2\in \text{Wafer}}$R2S\_S($R_b$,$id$,$w_2$)$\cdot$RReset\_D($R_b$)$\cdot$CloseInnerDoor($id$)$\cdot$\\
+	\phantom{-----------------} InnerDoorClosed($id$)$\cdot$ReleaseVacuum($id$)$\cdot$VacuumReleased($id$)$\cdot$S($id$,\emph{true},$w_2$,$closed$,\emph{false})\\
+	\phantom{---------} $\Diamond$\\
+	\phantom{-------------} $door=outer\_open \rightarrow$S2R\_S($R_a$,$id$,$w$)$\cdot$RReset\_O($R_a$)$\cdot$S($id$,\emph{false},Dummy,$door$,\emph{false})\\
+	\phantom{-------------} + $door=inner\_open \rightarrow$S2R\_S($R_b$,$id$,$w$)$\cdot$RReset\_O($R_b$)$\cdot$S($id$,\emph{false},Dummy,$door$,\emph{false})\\
+	\phantom{---------} + $door=closed \land \text{IsTreated}(w) \rightarrow$\\
+	\phantom{-------------} OpenOuterDoor($id$) $\cdot$ OuterDoorOpened($id$) $\cdot$ S($id$, $occupied$, $w$, $outer\_open$, \emph{false})\\
+	\phantom{---------} + $door=closed \land \neg\text{IsTreated}(w) \rightarrow$\\
+	\phantom{-------------} OpenInnerDoor($id$) $\cdot$ InnerDoorOpened($id$) $\cdot$ S($id$, $occupied$, $w$, $inner\_open$, \emph{false})\\
+	\phantom{---------} + SluiceBroken($id$) $\cdot$ S($id$, $occupied$, $w$, $door$, \emph{true});\\
+	}
 	
+	%Projector
+	{\small
+	\phantom{---} P( $occupied$:$\mathbb{B}$, $w$:Wafer ) =\\
+	\phantom{------} $occupied\rightarrow$\\
+	\phantom{---------} TreatWafer($w$)$\cdot$WaferTreated($w$)$\cdot$P2R\_P(TreatedWafer($w$))$\cdot$RReset\_O($R_c$)$\cdot$P(\emph{false},Dummy)\\
+	\phantom{------} $\Diamond$\\
+	\phantom{---------} $\sum\nolimits_{w_2\in \text{Wafer}}$ R2P\_P($w_2$) $\cdot$ RReset\_D($R_c$) $\cdot$ P(\emph{true}, $w_2$);
+	}
 	
+	%Rack
+	{\small
+	\phantom{---} Rack( $wl$:WaferList ) =\\
+	\phantom{-------} $\sum\nolimits_{w\in \text{Wafer}, p \in \mathbb{N}, r \in \text{RobotID}}$ OnRack($p$) $\rightarrow$ IsDummy( $wl.p$ ) $\rightarrow$\\
+	\phantom{-----------} R2Rack\_Rack($r$, $p$, $w$) $\cdot$ RReset\_D($r$) $\cdot$ Rack(PutInList($wl$, $p$, $w$))\\
+	\phantom{-------} + $\sum\nolimits_{p \in \mathbb{N}, r \in \text{RobotID}}$ OnRack( $p$ ) $\rightarrow \neg$IsDummy($wl.p$)$\rightarrow$\\
+	\phantom{-----------} Rack2R\_Rack($r$, $p$, $wl.p$) $\cdot$ RReset\_O( $r$ ) $\cdot$ Rack(PutInList($wl$, $p$, Dummy));
+	}
+	
+	%Initialisation\\
+	$\nabla_{\text{ \{RobotToSluice, RobotFromSluice, RobotToProjector, RobotFromProjector, RobotToRack, RobotFromRack,}}$\\
+	\phantom{--} $_{ \text{ RobotFromInput, RobotFromOutput,}}$\\
+	\phantom{--} $_{ \text{ CloseOuterDoor, CloseInnerDoor, OpenInnerDoor, OpenOuterDoor, PumpVacuum, ReleaseVacuum,}}$\\
+	\phantom{--} $_{ \text{ RobotReset, WaferTreated, OuterDrooOpened, OuterDoorClosed, InnerDoorOpened, InnerDoorClosed, VacuumDone, VacuumReleased\}}}$(\\
+	\phantom{---} $\Gamma_{\{R2S\_R|R2S\_S\rightarrow RobotToSluice,S2R\_S|S2R\_R\rightarrow RobotFromSluice,}$\\
+	\phantom{-----} $_{ R2P\_R|R2P\_P\rightarrow RobotToProjector, P2R\_P|P2R\_R\rightarrow RobotFromProjector,}$\\
+	\phantom{-----} $_{ R2Rack\_R|R2Rack\_P\rightarrow RobotToRack, Rack2R\_P|Rack2R\_R\rightarrow RobotFromRack,}$\\
+	\phantom{-----} $_{ RReset\_O|RReset\_D\rightarrow RobotReset \}}$(\\
+	\phantom{---------} R( $R_a$, \emph{false}, $Dummy$, \emph{InitWaferList(NumWafers)}, $\emptyset$, 0 ) $||$\\
+	\phantom{---------} R( $R_b$, \emph{false}, $Dummy$, [], $\emptyset$, 0 ) $||$\\
+	\phantom{---------} R( $R_c$, \emph{false}, $Dummy$, [], $\emptyset$, 0 ) $||$\\
+	\phantom{---------} Rack( $InitRack(RackSize)$ ) $||$\\
+	\phantom{---------} S( $S_0$, \emph{false}, $Dummy$, $outer\_open$, \emph{false} ) $||$\\
+	\phantom{---------} S( $S_1$, \emph{false}, $Dummy$, $outer\_open$, \emph{false} ) $||$\\
+	\phantom{---------} P( \emph{false}, $Dummy$ )\\
+	\phantom{---} )\\
+	);
+	
+	\chapter{Verification}
+	
+	\section{Verification procedure}
+	
+	\chapter{Appendix A}
+
+	\lstinputlisting[breaklines=true]{mcrl2-model/euv_waferstepper.mcrl2}
+	\chapter{Appendix B}
+	Modal formulas in mcrl format
 
 \end{document} 
