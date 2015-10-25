@@ -1,3 +1,4 @@
 % This formula expresses SR15.
 % RobotTakeWafer(C, p) or RobotDepositWafer(C, p) can only happen if robotAccessingRack(B,C_Rack) is false.
-% TODO
+
+[true*] forall p:Nat, w:Wafer. [(RobotToRack( Rb, p, w ) + RobotFromRack( Rb, p, w )).(!RobotReset( Rb ))*.(RobotToRack( Rc, p, w ) + RobotFromRack( Rc, p, w ))]false

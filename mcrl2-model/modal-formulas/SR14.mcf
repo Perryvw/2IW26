@@ -1,3 +1,4 @@
 % This formula expresses that
-% R14 Robot B may not access the same spot on the rack as Robot C at the same time.
-% TODO 
+% RobotTakeWafer(B, p) or RobotDepositWafer(B, p) can only happen if robotAccessingRack(C,C_Rack) is false.
+
+[true*] forall p:Nat, w:Wafer. [(RobotToRack( Rc, p, w ) + RobotFromRack( Rc, p, w )).(!RobotReset( Rc ))*.(RobotToRack( Rb, p, w ) + RobotFromRack( Rb, p, w ))]false
