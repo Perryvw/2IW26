@@ -503,11 +503,11 @@
         \hline
 
         \textbf{MCF13b} \\
-        $[true^{\star}] \forall p \in \mathbb{N}, w \in Wafer.[\overline{RobotToRack(Rb,p,w}^{\star}.RobotFromRack(Rc, p, w)]false$ \\
+        $\nu X(i=0) \forall w1,w2,w3,w4 \in Wafer. \exists p \in \mathbb{N}. \wedge (p \leq RackSize) \implies [\overline{RobotToRack(Rb,p,w1)} \wedge \overline{RobotFromRack(Rc,p,w2)}] X(i) \wedge [RobotToRack(Rb,p,w3)]X(i+1) \wedge [RobotFromRack(Rc,p,w4)](i > 0 \wedge X(i-1))$ \\
         \hline
 
         \textbf{MCF13c} \\
-        $[true^{\star}] \forall p \in \mathbb{N}, w \in Wafer.[\overline{RobotToRack(Rc,p,w}^{\star}.RobotFromRack(Rb, p, w)]false$ \\
+        $\nu X(i=0) \forall w1,w2,w3,w4 \in Wafer. \exists p \in \mathbb{N}. \wedge (p \leq RackSize) \implies [\overline{RobotToRack(Rc,p,w1)} \wedge \overline{RobotFromRack(Rb,p,w2)}] X(i) \wedge [RobotToRack(Rc,p,w3)]X(i+1) \wedge [RobotFromRack(Rb,p,w4)](i > 0 \wedge X(i-1))$ \\
         \hline
 
         \textbf{MCF14} \\
