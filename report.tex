@@ -174,31 +174,33 @@
 	\chapter{Requirements in terms of interactions}
 	\section{Liveness requirement}
 	\begin{itemize}
-		\reqb{SR1}{If a wafer appears at position p on the input rack, we should see the following sequence of actions. Other actions can happen between any two of these actions, provided they are not one of those two actions with different parameters.\\
+		\reqb{SR1}{If a wafer w appears on the input rack, we should see the following sequence of actions. Other actions can happen between any two of these actions, provided they are not one of those two actions with different parameters.\\
 		\begin{itemize}
-\item robotTakeWafer( A, p )
-\item robotWaferInSluice( A, s ) \emph{- For some arbitrary sluice s}
-\item robotWaferFromSluice( B, s )
-\item robotDepositWafer( B, p2 ) \emph{- For some arbitrary position p2 on the inner} rack.
-\item robotTakeWafer( C, p2 ) \emph{directly followed by} robotCTreatWafer.
-\item robotDepositWafer( C, p3 ) \emph{- For some arbitrary position p3 on the inner rack.}
-\item robotTakeWafer( B, p3 )
-\item robotWaferInSluice( B, s2 ) \emph{- For some arbitrary sluice s2.}
-\item robotWaferFromSluice( A, s2 )
-\item robotDepositWafer( A, p4 ) \emph{- For some arbitrary position p4 on the output rack.}
+\item RobotFromInput(w )
+\item RobotToSluice( $R_a$, s ) \emph{- For some arbitrary sluice s}
+\item RobotFromSluice( $R_b$, s ,w)
+\item RobotToRack( $R_b$, p2, w) \emph{- For some arbitrary position p2 on the inner} rack.
+\item RobotFromRack( $R_c$, p2 ,w ) 
+\item RobotToProjector( w ) 
+\item TreatWafer(w)
+\item RobotToRack( $R_c$, p3, w ) \emph{- For some arbitrary position p3 on the inner rack.}
+\item RobotFromRack( $R_b$, p3, w )
+\item RobotToSluice( $R_b$, s2, w ) \emph{- For some arbitrary sluice s2.}
+\item RobotFromSluice( $R_a$, s2,w )
+\item RobotToOutput( w )
 \end{itemize}
 }
 	\end{itemize}
 	
 	\section{Sluice requirements}
 	\begin{itemize}
-		\reqb{SR2}{openOuterDoor(N) if innerDoorOpen(N) is true.}
-		\reqb{SR3}{openOuterDoor(N) vacuum(N) is false.}
-		\reqb{SR4}{openInnerDoor(N) vacuum(N) is true.}
-		\reqb{SR5}{pumpVacuum(N) outerDoorOpen(N) and innerDoorOpen(N) are both true.}
+		\reqb{SR2}{OpenOuterDoor(N) can only happen after InnerDoorClosed(N) if no OpenInnerDoor(N) happened in between.}
+		\reqb{SR3}{OpenOuterDoor(N) can only after VacuumReleased(N) if no PumpVacuum(N) happened in between.}
+		\reqb{SR4}{OpenInnerDoor(N) can only happen after PumpVacuum(N) if no ReleaseVacuum(N) happened in between(}
+		\reqb{SR5}{PumpVacuum(N) can only happen after InnerDoorClosed(N) and OuterDoorClosed(N) if no OpenInnerDoor(N) or OpenOuterDoor(N) happened in between.}
 		\reqb{SR6}{
 \begin{itemize}		
-		\item closeOuterDoor(N) can only happen if robotInSluice(N) is false.
+		\item CloseInnerDoor(N) can only happen after RobotReset(R) if no  RobotToSluice(R) or RobotFromSluice(R) happened in between. \emph{For R $\subset{R_a, R_b}.$}
 \item closeInnerDoor(N) can only happen if robotInSluice(N) is false.
 \end{itemize}		
 		}
@@ -206,33 +208,40 @@
 	
 	\section{Sluice robot requirements}
 	\begin{itemize}
-		\reqb{SR7}{robotWaferInSluice(A,N) can only happen if outerDoorOpen(N) is true.}
-		\reqb{SR8}{robotWaferInSluice(B,N) can only happen if innerDoorOpen(N) is true.}
+		\reqb{SR7}{RobotToSluice($R_a$,N,w) or RobotFromSluice($R_a$,N,w) can only happen after OuterDoorOpened(N) if no CloseOuterDoor(N) happened in between.}
+		\reqb{SR8}{RobotToSluice($R_b$,N,w) or RobotFromSluice($R_b$,N,w) can only happen after InnerDoorOpened(N) if no InnerOuterDoor(N) happened in between.}
 		\reqb{SR9}{\begin{itemize}
-		\item  robotWaferInSluice(A, N) waferInSluice(N) is false.
-		\item robotWaferInSluice(B, N) waferInSluice(N) is false.
+		\item  RobotToSluice($R_a$, N, w) can only happen if \# RobotToSluice($R_a$, N, w) - \# RobotFromSluice($R_b$, N, w) = 0
+		\item  RobotToSluice($R_b$, N, w) can only happen if \# RobotToSluice($R_b$, N, w) - \# RobotFromSluice($R_a$, N, w) = 0
 		\end{itemize}}
-		\reqb{SR10}{
-		\begin{itemize}
-		\item robotWaferFromSluice(A, N) can only happen if  waferInSluice(N) is true
-		\item robotWaferFromSluice(B, N) can only happen if waferInSluice(N) is true.
-		\end{itemize}
-		}
-		\reqb{SR11}{RobotToRack( R, P ) can only happen after another RobotToRack( R, P ) with the same P, if a RobotFromRack( R, P ) has happened with the same P.}
-		\reqb{SR12}{openOuterDoor(N), closeOuterDoor(N), openInnerDoor(N), closeInnerDoor(N), pumpVacuum(N), releaseVacuum(N), robotWaferInSluice(R,N),robotWaferFromSluice(R,N),outerDoorOpened(N), outerDoorClosed(N),innerDoorOpened(N),innerDoorClosed(N),vacuumDone(N) and vacuumReleased(N) can only happen if sluiceBroken(N) is false.}
-		\reqb{SR13}{RobotFromRack( R, P ) can only happen if IsWaferOnRack( P ) is true for the same P.}
-		\reqb{SR14}{RobotTakeWafer(B, p) or RobotDepositWafer(B, p) can only happen if robotAccessingRack(C,C\_Rack) is false.}	\end{itemize}
+		\reqb{SR10}{\begin{itemize}
+		\item  RobotFromSluice($R_a$, N, w) can only happen if \# RobotToSluice($R_b$, N, w) - \# RobotFromSluice($R_a$, N, w) > 0
+		\item  RobotFromSluice($R_b$, N, w) can only happen if \# RobotToSluice($R_a$, N, w) - \# RobotFromSluice($R_b$, N, w) > 0
+		\end{itemize}}
+		\reqb{SR11}{\begin{itemize}
+		\item  RobotToRack($R_a$, P, w) can only happen if \# RobotToRack($R_a$, P, w) - \# RobotFromRack($R_b$, P, w) = 0
+		\item  RobotToRack($R_b$, P, w) can only happen if \# RobotToRack($R_b$, P, w) - \# RobotFromRack($R_a$, P, w) = 0
+		\end{itemize}}
+		\reqb{SR12}{RobotToSluice(R, N, w) and RobotFromSluice(R,N,w) can only happen if SluiceBroken(N) has not happened for all \emph{For R $\subset{R_a, R_b}.$}}
+		\reqb{SR13}{\begin{itemize}
+		\item  RobotFromRack($R_a$, P, w) can only happen if \# RobotToRack($R_a$, P, w) - \# RobotFromRack($R_b$, P, w) > 0
+		\item  RobotFromRack($R_b$, P, w) can only happen if \# RobotToRack($R_b$, P, w) - \# RobotFromRack($R_a$, P, w) > 0
+		\end{itemize}}
+		\reqb{SR14}{RobotToRack($R_b$,P,w) can not happen after RobotToRack($R_c$,P,w) happened without RobotReset($R_c$) in between.}	\end{itemize}
 	
 	\section{Inside robot requirements}
 	\begin{itemize}
-		\reqb{SR15}{RobotTakeWafer(C, p) or RobotDepositWafer(C, p) can only happen if robotAccessingRack(B,C\_Rack) is false. }
-		\reqb{SR16}{RobotToProjector( W ) can only happen twice in a row if RobotFromProjector( W ) happens in between.}
-		\reqb{SR17}{RobotFromProjector( W ) can only happen if TreatWafer ( W ) happens before.}
-		\reqb{SR18}{robotDepositWafer(C, N) can only happen if waferOnRack(C\_Rack, P) is true for some P.}
+		\reqb{SR15}{RobotToRack($R_c$,P,w) can not happen after RobotToRack($R_c$,P,w) happened without RobotReset($R_b$) in between.}	
+		\reqb{SR16}{RobotToProjector(w) can if \# RobotToProjector(w) - \# RobotFromProjector(w) = 0.}
+		\reqb{SR17}{RobotFromProjector(w) can not happen if WaferTreated(w) has not happened.}
+		\reqb{SR18}{
+		 RobotToRack($R_c$, P, w) can only happen if \# RobotToRack($R_c$, P, w) - \# RobotFromRack($R_b$, P, w) = 0}
 	\end{itemize}
 	\section{Projector requirements}
 	\begin{itemize}
-		\reqb{SR19}{treatWafer can only happen after robotCTreatWafer if no robotCRetrieve happened after that.}
+		\reqb{SR19}{
+				TreatWafer(w) can only happen if WaferToProject(w) happened with no WaferFromProjector(w) in between.
+		}
 	\end{itemize}
 	
 	\chapter{System model}
@@ -501,11 +510,11 @@
         \hline
 
         \textbf{MCF13b} \\
-        $\nu X(i=0) \forall w1,w2,w3,w4 \in Wafer. \exists p \in \mathbb{N}. \wedge (p \leq RackSize) \implies [\overline{RobotToRack(Rb,p,w1)} \wedge \overline{RobotFromRack(Rc,p,w2)}] X(i) \wedge [RobotToRack(Rb,p,w3)]X(i+1) \wedge [RobotFromRack(Rc,p,w4)](i > 0 \wedge X(i-1))$ \\
+        $[true^{\star}] \forall p \in \mathbb{N}, w \in Wafer.[\overline{RobotToRack(Rb,p,w}^{\star}.RobotFromRack(Rc, p, w)]false$ \\
         \hline
 
         \textbf{MCF13c} \\
-        $\nu X(i=0) \forall w1,w2,w3,w4 \in Wafer. \exists p \in \mathbb{N}. \wedge (p \leq RackSize) \implies [\overline{RobotToRack(Rc,p,w1)} \wedge \overline{RobotFromRack(Rb,p,w2)}] X(i) \wedge [RobotToRack(Rc,p,w3)]X(i+1) \wedge [RobotFromRack(Rb,p,w4)](i > 0 \wedge X(i-1))$ \\
+        $[true^{\star}] \forall p \in \mathbb{N}, w \in Wafer.[\overline{RobotToRack(Rc,p,w}^{\star}.RobotFromRack(Rb, p, w)]false$ \\
         \hline
 
         \textbf{MCF14} \\
