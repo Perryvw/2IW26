@@ -202,8 +202,8 @@ System actions are actions that the system initiates, so they are an order from 
 		\item  RobotToSluice($R_b$, N, w) can only happen if \# RobotToSluice($R_b$, N, w) - \# RobotFromSluice($R_a$, N, w) = 0
 		\end{itemize}}
 		\reqb{SR10}{\begin{itemize}
-		\item  RobotFromSluice($R_a$, N, w) can only happen if \# RobotToSluice($R_b$, N, w) - \# RobotFromSluice($R_a$, N, w) > 0
-		\item  RobotFromSluice($R_b$, N, w) can only happen if \# RobotToSluice($R_a$, N, w) - \# RobotFromSluice($R_b$, N, w) > 0
+		\item  RobotFromSluice($R_a$, N, w) can only happen if \# RobotToSluice($R_b$, N, w) - \# RobotFromSluice($R_a$, N, w) $>$ 0
+		\item  RobotFromSluice($R_b$, N, w) can only happen if \# RobotToSluice($R_a$, N, w) - \# RobotFromSluice($R_b$, N, w) $>$ 0
 		\end{itemize}}
 		\reqb{SR11}{\begin{itemize}
 		\item  RobotToRack($R_a$, P, w) can only happen if \# RobotToRack($R_a$, P, w) - \# RobotFromRack($R_b$, P, w) = 0
@@ -211,8 +211,8 @@ System actions are actions that the system initiates, so they are an order from 
 		\end{itemize}}
 		\reqb{SR12}{RobotToSluice(R, N, w) and RobotFromSluice(R,N,w) can only happen if SluiceBroken(N) has not happened for all \emph{For R $\subset{R_a, R_b}.$}}
 		\reqb{SR13}{\begin{itemize}
-		\item  RobotFromRack($R_a$, P, w) can only happen if \# RobotToRack($R_a$, P, w) - \# RobotFromRack($R_b$, P, w) > 0
-		\item  RobotFromRack($R_b$, P, w) can only happen if \# RobotToRack($R_b$, P, w) - \# RobotFromRack($R_a$, P, w) > 0
+		\item  RobotFromRack($R_a$, P, w) can only happen if \# RobotToRack($R_a$, P, w) - \# RobotFromRack($R_b$, P, w) $>$ 0
+		\item  RobotFromRack($R_b$, P, w) can only happen if \# RobotToRack($R_b$, P, w) - \# RobotFromRack($R_a$, P, w) $>$ 0
 		\end{itemize}}
 		\reqb{SR14}{RobotToRack($R_b$,P,w) can not happen after RobotToRack($R_c$,P,w) happened without RobotReset($R_c$) in between.}	\end{itemize}
 	
