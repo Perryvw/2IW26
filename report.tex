@@ -65,11 +65,11 @@
 	\section{System overview}
 	\begin{figure}
 		\centering
-		\includegraphics[scale=0.7]{schematicoverview}
+		\includegraphics[scale=0.7]{systemmodel}
 		\caption{A schematic overview of the system}
 		\label{fig:overview}
 	\end{figure}
-	The Extreme Ultraviolet (EUV) Wafer Stepper is a system developed by ASML to treat silicon wafers for the manufacturing of integrated circuits. Treating a wafer is the act of projecting an image with ultra violet light onto a silicon wafer. Since ultra violet radiation is absorbed by air, this treatment has to happen in a vacuum to ensure the accuracy of the projection. This means wafers will have to enter and exit the system through airlocks, also referred to as sluices. One robot will move wafers from the input to the airlocks or from the airlocks to the output for treated wafers from outside the vacuum chamber. One robot will move wafers from the airlocks to a buffer rack inside the vacuum chamber and vice versa for treated wafers. A last robot, located inside the vacuum chamber, takes wafers from the internal buffer rack to the projector and back once the projector is done. A schematic overview of the system can be found in figure \ref{fig:overview}.
+	The Extreme Ultraviolet (EUV) Wafer Stepper is a system developed by ASML to treat silicon wafers for the manufacturing of integrated circuits. Treating a wafer means projecting an image onto a silicon wafer with ultra violet light. Since ultra violet radiation is absorbed by air, this treatment has to happen in a vacuum to ensure the accuracy of the projection. This means wafers will have to enter and exit the system through airlocks, also referred to as sluices. The version of the system described in this document has two sluices. One robot will move wafers from the input to the airlocks or from the airlocks to the output for treated wafers from outside the vacuum chamber. One robot will move wafers from the airlocks to a buffer rack inside the vacuum chamber and vice versa for treated wafers. A last robot, located inside the vacuum chamber, takes wafers from the internal buffer rack to the projector and back once the projector is done. A schematic overview of the system can be found in figure \ref{fig:overview}.
 	\section{System components}
 	The system can be broken down into individual components to be considered by the software. These components are the following:
 	\begin{itemize}
@@ -135,7 +135,8 @@
 	\end{itemize}
 	
 	\chapter{System interactions}
-\section{User actions}
+\section{System actions}
+System actions are actions that the system initiates, so they are an order from the system to subsystems, and can be done at any point.
 	\begin{itemize}
 \item OpenOuterDoor(N) - Open the outer door of sluice N.
 \item CloseOuterDoor(N) - Close the outer door of sluice N.
@@ -160,6 +161,8 @@
 \end{itemize}
 
 	\section{System events}
+	This model uses the notion of system events, which are also just actions. It is assumed however that these
+	actions are only allowed when the corresponding event fires. This mean that RobotReset(R) is only allowed for a fraction of time at the moment Robot R fires the event that it has reset. If only one component relies on the event it will be used like any other action. If multiple components rely on the same event instance it will be mapped as a synchronisation communication.
 	\begin{itemize}
 \item RobotReset( R ) - Robot R has reset to its default position.
 \item OuterDoorOpened( S ) - The outer door of sluice S has completely opened.
@@ -254,6 +257,7 @@
 	A schematic view of this system can also be found in figure \ref{fig:components}.
 	
 	\section{Formal model}
+	First the different sorts present in the model are defined.\\
 	%Sorts
 	\textbf{sort}\\
 	\phantom{----} Wafer = \textbf{struct} \emph{wafer}$( id:\mathbb{Z}, treated:\mathbb{B} )$;\\
@@ -263,6 +267,7 @@
 	\phantom{----} SluiceID = \textbf{struct} $S_0 | S_1$;\\
 	\phantom{----} SluiceDoorState = \textbf{struct} $inner\_open|closed|outer\_open$;\\
 	\\
+	Some global parameters can be defined that hold for the system.\\
 	%Params
 	\textbf{eqn}\\
 	\phantom{----} RackSize = 2;\\
@@ -270,6 +275,7 @@
 	\phantom{----} NumSluices = 2;\\
 	\phantom{----} Dummy = \emph{wafer}$( -1, false)$;\\
 	\\
+	Some helper-equations are defined, the names are self-explanatory.\\
 	%Helper equations
 	\textbf{eqn}\\
 	\phantom{----} IsTreated( \emph{wafer}$( w, b )$ ) = $b$;\hfill for all $w \in \mathbb{Z}, b \in \mathbb{B}$\\
@@ -288,7 +294,12 @@
 	\phantom{----} InitWaferList( 0 ) = [];\\
 	\phantom{----} InitWaferList( n ) = InitWaferList( n - 1 ) $<|$ \emph{wafer}($n$, \emph{false});\hfill for all $n \in \mathbb{N}$\\
 	\\
-	%Processes
+	The main part of the system model are the processes that make up the system. There is one process for each of the four components in the system. Multiple instances of each process can be run in parallel with different parameters, as explained at the initialisation.\\
+	\\%Processes
+	The first process is the robot process, consisting of three parts, one for each robot. Each model waits for its RobotReset event after each action before continuing. This event might require a synchronisation step if two components are waiting for the same event.\\
+	If robot A is holding a treated wafer it will put it down on the output. If it is holding an untreated wafer, it will try to put it in a sluice and increase its counter. If robot A is not holding anything, it will either take a wafer from one of the sluices if there is one available and decrease its counter, or if the input list is not empty, and the robot's counter is less than the number of sluices, it will pick up a new wafer from the input. The purpose of the counter is to prevent the robot from picking up a wafer when there are no sluices available to put it down in.\\
+	If robot B is holding a treated wafer it will try to put it in one of the sluices. If it is holding an untreated wafer, it will put it down on the rack. If robot B is not holding a wafer, it will try to take an untreated wafer from the sluices, or take a treated wafer from the rack.\\
+	Robot C will put a wafer on the projector if it is holding an untreated wafer. It will then wait until the projector is done before picking up the wafer again and putting it back on the rack. If robot C is not holding anything and is not waiting for the projector it will try to pick up a wafer from the rack.\\
 	{\small
 	%Robot
 	\textbf{proc}\\
@@ -320,8 +331,11 @@
 	\phantom{-----------------------------} RReset\_D(\emph{rID})$\cdot$R(\emph{rID},\emph{true},$w_2$,$in$,$out$,$c$);
 	}\\
 	\\
+	The sluice process holds parameters for its id, if it is occupied or not, the wafer that is in that wafer, the state of the door and if the sluice is broken or not. Sluices will wait until robots have returned to their rest position before closing their doors. If there is no wafer in the sluice and the inner/outer door is open, the sluice will accept a wafer from robot B/robot A respectively and start closing. If there is a wafer in the sluice and the inner/outer door is open, the sluice will wait until robot B/robot A respectively takes the wafer out of it. If the doors of a sluice are closed and the wafer inside is treated, the sluice will release the vacuum. Once the vacuum is released it will start opening the outer doors. If the sluice doors are closed and there is an untreated wafer inside, the sluice will pumping a vacuum. If the vacuum is done the sluice will open its inner doors. On top of this the wafer could non-deterministically break at any point.\\
+	Note: This protocol for the sluices means that there can never be more wafers in the vacuum chamber than the number of sluices. Therefore the spaces on the rack could be limited to the number of sluices in the system.\\
 	%Sluice
 	{\small
+	\textbf{proc}\\
 	\phantom{---} S( $id$:SluiceID, $occupied$:$\mathbb{B}$, $w$:Wafer, $door$:DoorState, $broken$:$\mathbb{B}$ ) =\\
 	\phantom{------} $\neg broken \rightarrow$\\
 	\phantom{---------} $\neg occupied \rightarrow$\\
@@ -337,27 +351,34 @@
 	\phantom{---------} + $door=closed \land \neg\text{IsTreated}(w) \rightarrow$\\
 	\phantom{-------------} OpenInnerDoor($id$) $\cdot$ InnerDoorOpened($id$) $\cdot$ S($id$, $occupied$, $w$, $inner\_open$, \emph{false})\\
 	\phantom{---------} + SluiceBroken($id$) $\cdot$ S($id$, $occupied$, $w$, $door$, \emph{true});\\
-	}
-	
+	}\\
+	The projector process keeps track of if there is a wafer inside, and which wafer that is. If the projector is occupied, it will treat the wafer and once that is done wait until the wafer was picked up by robot C before going back to its unoccupied state. If there is no wafer on the projector it will accept a wafer from robot C.\\
 	%Projector
 	{\small
+	\textbf{proc}\\
 	\phantom{---} P( $occupied$:$\mathbb{B}$, $w$:Wafer ) =\\
 	\phantom{------} $occupied\rightarrow$\\
 	\phantom{---------} TreatWafer($w$)$\cdot$WaferTreated($w$)$\cdot$P2R\_P(TreatedWafer($w$))$\cdot$RReset\_O($R_c$)$\cdot$P(\emph{false},Dummy)\\
 	\phantom{------} $\Diamond$\\
 	\phantom{---------} $\sum\nolimits_{w_2\in \text{Wafer}}$ R2P\_P($w_2$) $\cdot$ RReset\_D($R_c$) $\cdot$ P(\emph{true}, $w_2$);
-	}
-	
+	}\\
+	The rack process is just to \\
 	%Rack
 	{\small
+	\textbf{proc}\\
 	\phantom{---} Rack( $wl$:WaferList ) =\\
 	\phantom{-------} $\sum\nolimits_{w\in \text{Wafer}, p \in \mathbb{N}, r \in \text{RobotID}}$ OnRack($p$) $\rightarrow$ IsDummy( $wl.p$ ) $\rightarrow$\\
 	\phantom{-----------} R2Rack\_Rack($r$, $p$, $w$) $\cdot$ RReset\_D($r$) $\cdot$ Rack(PutInList($wl$, $p$, $w$))\\
 	\phantom{-------} + $\sum\nolimits_{p \in \mathbb{N}, r \in \text{RobotID}}$ OnRack( $p$ ) $\rightarrow \neg$IsDummy($wl.p$)$\rightarrow$\\
 	\phantom{-----------} Rack2R\_Rack($r$, $p$, $wl.p$) $\cdot$ RReset\_O( $r$ ) $\cdot$ Rack(PutInList($wl$, $p$, Dummy));
-	}
-	
+	}\\
+
+	The initialisation of the system without any hiding and all steps allowed can be found below. Note the RobotReset synchronisation of steps RReset\_O(rigin) and RReset\_D(estination), which is for when two components are waiting on the same RobotReset event. An instance of the robot process is started for each process. Robot A recievs the input list, since robot A is the only robot that can reach the input. This is the entry point for wafers into the system.\\
+	A process is initialised for the rack with a list of dummies equal to the size of the rack.\\
+	For each sluice a parallel instance of the sluice process is started. Each sluice is empty initially and has the outer doors open.\\
+	A process is started for the projector that is empty at the start.\\
 	%Initialisation\\
+	\textbf{init}\\
 	$\nabla_{\text{ \{RobotToSluice, RobotFromSluice, RobotToProjector, RobotFromProjector, RobotToRack, RobotFromRack,}}$\\
 	\phantom{--} $_{ \text{ RobotFromInput, RobotFromOutput,}}$\\
 	\phantom{--} $_{ \text{ CloseOuterDoor, CloseInnerDoor, OpenInnerDoor, OpenOuterDoor, PumpVacuum, ReleaseVacuum,}}$\\
@@ -379,34 +400,34 @@
 	\chapter{Verification}
 
     \section{Requirement verification}
-
+    
     \textbf{Traceability matrix}\\
     \begin{tabular}{| l | l | l | }
         \hline
         Requirement ID & System Requirement ID & Modal formula ID \\ \hline
-        R1 & SR1 & MCF1 \\ \hline
-        R2 & SR2 & MCF2inner, MCF2outer \\ \hline
-        R3 & SR3 & MCF3 \\ \hline
-        R4 & SR4 & MCF4 \\ \hline
-        R5 & SR5 & MCF5 \\ \hline
-        R6 & SR6 & MCF6a1, MCF6a2, MCF6b1, MCF6b2 \\ \hline
-        R7 & SR7 & MCF71, MCF72 \\ \hline
-        R8 & SR8 & MCF82, MCF82 \\ \hline
-        R9 & SR9 & MCF9a, MCF9b \\ \hline
-        R10 & SR10 & MCF10a, MCF10b \\ \hline
-        R11 & SR11 & MCF11 \\ \hline
-        R12 & SR12 & MCF12 \\ \hline
-        R13 & SR13 & MCF13b, MCF13c \\ \hline
-        R14 & SR14 & MCF14 \\ \hline
-        R15 & SR15 & MCF15 \\ \hline
-        R16 & SR16 & MCF16 \\ \hline
-        R17 & SR17 & MCF17 \\ \hline
-        R18 & SR18 & MCF18 \\ \hline
-        R19 & SR19 & MCF19 \\  \hline
+        R1 & SR1 & MCF1 \\ \hline 
+        R2 & SR2 & MCF2inner, MCF2outer \\ \hline 
+        R3 & SR3 & MCF3 \\ \hline 
+        R4 & SR4 & MCF4 \\ \hline 
+        R5 & SR5 & MCF5 \\ \hline 
+        R6 & SR6 & MCF6a1, MCF6a2, MCF6b1, MCF6b2 \\ \hline 
+        R7 & SR7 & MCF71, MCF72 \\ \hline 
+        R8 & SR8 & MCF82, MCF82 \\ \hline 
+        R9 & SR9 & MCF9a, MCF9b \\ \hline 
+        R10 & SR10 & MCF10a, MCF10b \\ \hline 
+        R11 & SR11 & MCF11 \\ \hline 
+        R12 & SR12 & MCF12 \\ \hline 
+        R13 & SR13 & MCF13b, MCF13c \\ \hline 
+        R14 & SR14 & MCF14 \\ \hline 
+        R15 & SR15 & MCF15 \\ \hline 
+        R16 & SR16 & MCF16 \\ \hline 
+        R17 & SR17 & MCF17 \\ \hline 
+        R18 & SR18 & MCF18 \\ \hline 
+        R19 & SR19 & MCF19 \\  \hline 
     \end{tabular}
-
+    
     \pagebreak
-
+    
     \textbf{Modal $\mu$-calculus formulas}\\
     \begin{longtable}{p{\textwidth}}
         \textbf{MCF1}\\
@@ -419,119 +440,119 @@
 
         \textbf{MCF2outer}\\
         $\forall s \in SluiceID.[true^{\star}.OuterDoorOpened(s).\overline{OuterDoorClosed(s)}^{\star}.OpenInnerDoor(s)]false$\\
-        \hline
-
+        \hline 
+        
         \textbf{MCF3}\\
         $[true^{\star}] \forall s \in SluiceID. [PumpVacuum(s).\overline{ReleaseVacuum}^{\star}.OpenOuterDoor(s)]true$\\
         \hline
-
+        
         \textbf{MCF4}\\
         $\forall s \in SluiceID.[true^{\star}.ReleaseVacuum(s).\overline{PumpVacuum}^{\star}.OpenInnerDoor(s)]true$\\
         \hline
-
+        
         \textbf{MCF5}\\
         $\forall s \in SluiceID.[true^{\star}.(OpenInnerDoor(s).\overline{InnerDoorClose(s)}^{\star}.PumpVacuum(s) \vee OpenOuterDoor(s).\overline{OpenOuterDoorClose(s)}^{\star}.PumpVacuum(s))]false$ \\
         \hline
-
+        
         \textbf{MCF6a1}\\
         $[true^{\star}] \forall w \in Wafer, s \in SluiceID.[RobotFromSluice(Ra,s,w).\overline{RobotReset(Ra)}$ \\
         $.CloseOuterDoor(s)]false$\\
         \hline
-
+        
         \textbf{MCF6a2}\\
         $[true^{\star}] \forall w \in Wafer, s \in SluiceID.[RobotToSluice(Ra,s,w).\overline{RobotReset(Ra)}$ \\
         $.CloseOuterDoor(s)]false$\\
         \hline
-
+        
         \textbf{MCF6b1}\\
         $[true^{\star}] \forall w \in Wafer, s \in SluiceID.[RobotFromSluice(Rb,s,w).\overline{RobotReset(Rb)}$ \\
         $.CloseOuterDoor(s)]false$\\
         \hline
-
+        
         \textbf{MCF6b2}\\
         $[true^{\star}] \forall w \in Wafer, s \in SluiceID.[RobotToSluice(Rb,s,w).\overline{RobotReset(Rb)}$ \\
         $.CloseOuterDoor(s)]false$\\
         \hline
-
+        
         \textbf{MCF71}\\
-        $[true^{\star}] \forall s \in SluiceID.[OuterDoorClosed(s).\overline{OuterDoorOpened}^{\star}]$ \\
-        $\forall w \in Wafer. [RobotToSluice(Ra,s,w)]false$\\
+        $[true^{\star}] \forall w \in Wafer, s \in SluiceID.[OuterDoorClosed(s).\overline{OuterDoorOpened}^{\star}$ \\ 
+        $.RobotToSluice(Ra,s,w)]false$\\
         \hline
-
+        
         \textbf{MCF72}\\
-        $[true^{\star}] \forall s \in SluiceID.[OuterDoorClosed(s).\overline{OuterDoorOpened}^{\star}]$ \\
-        $\forall w \in Wafer. [RobotFromSluice(Ra,s,w)]false$\\
-        \hline
-
+        $[true^{\star}] \forall w \in Wafer, s \in SluiceID.[OuterDoorClosed(s).\overline{OuterDoorOpened}^{\star}$ \\
+        $.RobotFromSluice(Ra,s,w)]false$\\
+        \hline 
+        
         \textbf{MCF81}\\
-        $[true^{\star}] \forall s \in SluiceID.[InnerDoorClosed(s).\overline{InnerDoorOpened(s)}^{\star}]$ \\
-        $\forall w \in Wafer. [RobotToSluice(Rb, s, w)]false$\\
-        \hline
-
+        $[true^{\star}] \forall w \in Wafer, s \in SluiceID.[InnerDoorClosed(s).\overline{InnerDoorOpened(s)}^{\star}$ \\
+        $.RobotToSluice(Rb, s, w)]false$\\
+        \hline  
+        
         \textbf{MCF82}\\
-        $[true^{\star}] \forall s \in SluiceID.[InnerDoorClosed(s).\overline{InnerDoorOpened(s)}^{\star}]$ \\
-        $\forall w \in Wafer. [RobotFromSluice(Rb, s, w)]false$\\
-        \hline
-
+        $[true^{\star}] \forall w \in Wafer, s \in SluiceID.[InnerDoorClosed(s).\overline{InnerDoorOpened(s)}^{\star}$ \\
+        $.RobotFromSluice(Rb, s, w)]false$\\
+        \hline     
+        
         \textbf{MCF9a}\\
         $[true^{\star}] \forall w1,w2 \in Wafer, s in SluiceID.[RobotToSluice(Ra,s,w1).\overline{RobotFromSluice(Rb,s,w1)}^{\star}$ \\
         $.RobotToSluice(Ra,s,w2)]false$\\
         \hline
-
+        
         \textbf{MCF9b}\\
         $[true^{\star}] \forall w1,w2 \in Wafer, s in SluiceID.[RobotToSluice(Rb,s,w1).\overline{RobotFromSluice(Ra,s,w1)}^{\star}$ \\
         $.RobotToSluice(Rb,s,w2)]false$ \\
         \hline
-
+        
         \textbf{MCF10a}\\
         $[true^{\star}] \forall w \in Wafer, s \in SluiceID. [\overline{RobotToSluice(Rb,s,w)}^{\star}.RobotFromSluice(Ra,s,w)]$ \\
         $false$ \\
         \hline
-
+        
         \textbf{MCF10b}\\
         $[true^{\star}] \forall w \in Wafer, s \in SluiceID. [\overline{RobotToSluice(Ra,s,w)}^{\star}.RobotFromSluice(Rb,s,w)]$ \\
         $false$ \\
         \hline
-
+        
         \textbf{MCF11}\\
         $[true^{\star}] \forall p \in \mathbb{N}, r \in RobotID, w \in Wafer. [RobotToRack(r,p,w).\overline{RobotFromRack(r,p,w)}^\star$ \\
         $.RobotToRack(r,p,w)]false$ \\
         \hline
-
+        
         \textbf{MCF12} \\
         $[true^{\star}] \forall s \in SluiceID [SluiceBroken(n).true^{\star}.(CloseInnerDoor(s) \vee CloseOuterDoor(s) \vee OpenInnerDoor(s) \vee OpenOuterDoor(s) \vee PumpVacuum(s) \vee ReleaseVacuum(s) \vee SluiceBroken(s))]false$\\
         \hline
-
+        
         \textbf{MCF13b} \\
         $[true^{\star}] \forall p \in \mathbb{N}, w \in Wafer.[\overline{RobotToRack(Rb,p,w}^{\star}.RobotFromRack(Rc, p, w)]false$ \\
         \hline
-
+        
         \textbf{MCF13c} \\
         $[true^{\star}] \forall p \in \mathbb{N}, w \in Wafer.[\overline{RobotToRack(Rc,p,w}^{\star}.RobotFromRack(Rb, p, w)]false$ \\
         \hline
-
+        
         \textbf{MCF14} \\
         $[true^{\star}] \forall p \in \mathbb{N}, w \in Wafer. [(RobotToRack(Rc,p,w) \vee RobotFromRack(Rc,p,w)).\overline{RobotReset(Rc}^{\star}.(RobotRack(Rb,p,w) \vee RobotFromRack(Rb,p,w)]false$ \\
         \hline
-
+        
         \textbf{MCF15} \\
         $[true^{\star}] \forall p \in \mathbb{N}, w \in Wafer. [(RobotToRack(Rb,p,w) \vee RobotFromRack(Rb,p,w)).\overline{RobotReset(Rb}^{\star}.(RobotRack(Rc,p,w) \vee RobotFromRack(Rc,p,w)]false$ \\
         \hline
-
+        
         \textbf{MCF16} \\
-        $[true^{\star}] \forall w\in Wafer. [RobotToProjector(w).\overline{RobotFromProjector(w)}^{\star}]$ \\
-        $\exists w2 \in Wafer.[RobotToProjector(w2)]false$ \\
+        $[true^{\star}] \forall w,w2 \in Wafer. [RobotToProjector(w).\overline{RobotFromProjector(w)}^{\star}$ \\
+        $.RobotToProjector(w2)]false$ \\
         \hline
-
+        
         \textbf{MCF17} \\
         $[true^{\star}] \forall w \in Wafer. [RobotToProjector(w).\overline{TreatWafer(W)}^{\star}.RobotFromProjector(w)]false$ \\
         \hline
-
+        
         \textbf{MCF18} \\
-        $[true^{\star}] \forall w \in Wafer, p \in \mathbb{N}. [RobotToRack(Rc, p, w).\overline{RobotFromRack(Rb,p,w)}^{\star}]$ \\
-        $\exists w2 \in Wafer.[RobotToRack(Rc,p,w2)]false$ \\
+        $[true^{\star}] \forall w \in Wafer, p \in \mathbb{N}. [RobotToRack(Rc, p, w).\overline{RobotFromRack(Rb,p,w)}^{\star}$ \\
+        $.RobotToRack(Rc,p,w)]false$ \\
         \hline
-
+        
         \textbf{MCF19} \\
         $[true^{\star}] \forall w \in Wafer. [RobotToProjector(w).true^{\star}.RobotFromProjector(w).true^{\star}$ \\
         $.TreatWafer(w)]false$ \\
