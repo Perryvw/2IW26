@@ -360,7 +360,7 @@
 	$\nabla_{\text{ \{RobotToSluice, RobotFromSluice, RobotToProjector, RobotFromProjector, RobotToRack, RobotFromRack,}}$\\
 	\phantom{--} $_{ \text{ RobotFromInput, RobotFromOutput,}}$\\
 	\phantom{--} $_{ \text{ CloseOuterDoor, CloseInnerDoor, OpenInnerDoor, OpenOuterDoor, PumpVacuum, ReleaseVacuum,}}$\\
-	\phantom{--} $_{ \text{ RobotReset, WaferTreated, OuterDrooOpened, OuterDoorClosed, InnerDoorOpened, InnerDoorClosed, VacuumDone, VacuumReleased\}}}$(\\
+	\phantom{--} $_{ \text{ RobotReset, WaferTreated, OuterDrooOpened, OuterDoorClosed, InnerDoorOpened, InnerDoorClosed, VacuumDone, VacuumReleased, SluiceBroken\}}}$(\\
 	\phantom{---} $\Gamma_{\{R2S\_R|R2S\_S\rightarrow RobotToSluice,S2R\_S|S2R\_R\rightarrow RobotFromSluice,}$\\
 	\phantom{-----} $_{ R2P\_R|R2P\_P\rightarrow RobotToProjector, P2R\_P|P2R\_R\rightarrow RobotFromProjector,}$\\
 	\phantom{-----} $_{ R2Rack\_R|R2Rack\_P\rightarrow RobotToRack, Rack2R\_P|Rack2R\_R\rightarrow RobotFromRack,}$\\
@@ -376,8 +376,14 @@
 	);
 	
 	\chapter{Verification}
-	
 	\section{Verification procedure}
+	Several steps were taken to verify the correctness of this model. First, the model was translated into mCRL2 syntax. Next, all modal formulas were translated into the mcf format used by the mCRL2 tools. Once both translations were done, a linear process specification was generated from the mCRL2 input. This LPS was used to verify the requirements by generating a parameterized boolean expression system for each modal formula.\\
+	For the verification of the system release version 201409.1.13218 of the mCRL2 tools was used.\\
+	\\
+	The system was verified for wafer counts from 1 to 5 to avoid any statespace problems. This should nonetheless present an accurate view of the system, as the maximum amount of wafers inside the vacuum chamber is at most the number of sluices, which is two.
+	
+	\section{Verification results}
+	Results of the verification: matrix numwafers x requirement, value = true/false.	
 	
 	\chapter{Appendix A}
 
