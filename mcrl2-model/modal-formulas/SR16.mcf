@@ -1,3 +1,4 @@
 % This formula expresses SR16.
+% Robot C cannot put a wafer on an occupied projector.
 
-[true*] forall w,w2:Wafer. [RobotToProjector( w ).(!RobotFromProjector( w ))*.RobotToProjector( w2 )]false
+[true*] forall w:Wafer. [RobotToProjector( w ).(!RobotFromProjector( w ))*] exists w2:Wafer. [RobotToProjector( w2 )]false
