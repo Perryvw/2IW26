@@ -86,7 +86,7 @@ eqn  InitWaferList(0)     = [];
 %===========================================================================
 act
 	%Robot actions - communications
-	RobotFromSluice : RobotID # SluiceID # Wafer; %A robot starts taking a wafer from a sluice
+	RobotFromSluice : RobotID # SluiceID # Wafer; %A robot starts taking a wafer from a sluicez
 	RobotToSluice : RobotID # SluiceID # Wafer; %A robot starts putting a wafer in a sluice
 	RobotToProjector : Wafer; %Robot C starts putting a wafer on the projector
 	RobotFromProjector : Wafer; %Robot C starts taking the wafer from the projector 
