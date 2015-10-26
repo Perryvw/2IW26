@@ -177,24 +177,8 @@ System actions are actions that the system initiates, so they are an order from 
 	\chapter{Requirements in terms of interactions}
 	\section{Liveness requirement}
 	\begin{itemize}
-		\reqb{SR1}{If a wafer w appears on the input rack, we should see the following sequence of actions. Other actions can happen between any two of these actions, provided they are not one of those two actions with different parameters.\\
-		\begin{itemize}
-\item RobotFromInput(w )
-\item RobotToSluice( $R_a$, s ) \emph{- For some arbitrary sluice s}
-\item RobotFromSluice( $R_b$, s ,w)
-\item RobotToRack( $R_b$, p2, w) \emph{- For some arbitrary position p2 on the inner} rack.
-\item RobotFromRack( $R_c$, p2 ,w ) 
-\item RobotToProjector( w ) 
-\item TreatWafer(w)
-\item RobotToRack( $R_c$, p3, w ) \emph{- For some arbitrary position p3 on the inner rack.}
-\item RobotFromRack( $R_b$, p3, w )
-\item RobotToSluice( $R_b$, s2, w ) \emph{- For some arbitrary sluice s2.}
-\item RobotFromSluice( $R_a$, s2,w )
-\item RobotToOutput( w )
-\end{itemize}
-}
+		\reqb{SR1}{After a RobotFromInput(w) happened a TreatWafer(w) should eventually happen, eventually happened by RobotToOutput(TreatedWafer(w))}
 	\end{itemize}
-	
 	\section{Sluice requirements}
 	\begin{itemize}
 		\reqb{SR2}{OpenOuterDoor(N) can only happen after InnerDoorClosed(N) if no OpenInnerDoor(N) happened in between.}
@@ -440,7 +424,8 @@ System actions are actions that the system initiates, so they are an order from 
     \textbf{Modal $\mu$-calculus formulas}\\
     \begin{longtable}{p{\textwidth}}
         \textbf{MCF1}\\
-        $[true^{\star}] \forall w \in Wafer. [TreatWafer(w).\overline{RobotToOutput(w)}^{\star}.RobotToOutput(w)]false$\\
+        $[true^{\star}] \forall w \in Wafer. [WaferFromInput(w) . TreatWafer(w).$ \\
+        $\overline{RobotToOutput(TreatedWafer(w))}^{\star}.RobotToOutput(w)]false$\\
         \hline
 
         \textbf{MCF2inner}\\
@@ -567,18 +552,12 @@ System actions are actions that the system initiates, so they are an order from 
     \end{longtable}
 	
 	\section{Verification procedure}
-	Several steps were taken to verify the correctness of this model. First, the model was translated into mCRL2 syntax. Next, all modal formulas were translated into the mcf format used by the mCRL2 tools. Once both translations were done, a linear process specification was generated from the mCRL2 input. This LPS was used to verify the requirements by generating a parameterized boolean expression system for each modal formula.\\
+	Several steps were taken to verify the correctness of this model. First, the model was translated into mCRL2 syntax. Next, all modal formulas were translated into the mcf format used by the mCRL2 tools. Once both translations were done, a linear process specification was generated from the mCRL2 input. This LPS was used to verify the requirements by generating a parameterized boolean expression system for each modal formula and evaluating this expression.\\
 	For the verification of the system release version 201409.1.13218 of the mCRL2 tools was used.\\
 	\\
 	The system was verified for wafer counts from 1 to 5 to avoid any statespace problems. This should nonetheless present an accurate view of the system, as the maximum amount of wafers inside the vacuum chamber is at most the number of sluices, which is two.
 	
 	\section{Verification results}
-	Results of the verification: matrix numwafers x requirement, value = true/false.	
-	
-	\chapter{Appendix A}
-
-	\lstinputlisting[breaklines=true]{mcrl2-model/euv_waferstepper.mcrl2}
-	\chapter{Appendix B}
-	Modal formulas in mcrl format
+	Results of the verification: All modal formulas evaluated to true. Thus all requirements are met by the system.
 
 \end{document} 
