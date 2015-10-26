@@ -1,6 +1,6 @@
-%===========================================================================
+%====================================================================
 % Sort definitions
-%===========================================================================
+%====================================================================
 sort 
 	Wafer = struct wafer( id:Int, treated:Bool );
 	WaferSet = Set( Wafer );
@@ -9,9 +9,9 @@ sort
 	SluiceID = struct S0 | S1;
 	SluiceDoorState = struct inner_open | closed | outer_open; 
 
-%===========================================================================
+%====================================================================
 % Parameters
-%===========================================================================
+%====================================================================
 map RackSize: Nat;
 eqn RackSize = 3;
 
@@ -30,9 +30,9 @@ eqn inputList = InitWaferList( NumWafers );
 map output : Set( Wafer );
 eqn output = {};
 
-%===========================================================================
+%====================================================================
 % Mapping definitions
-%===========================================================================
+%====================================================================
 %Return true if the wafer is treated, false otherwise
 map IsTreated : Wafer -> Bool;
 var t:Bool;
@@ -81,9 +81,9 @@ var  n : Nat;
 eqn  InitWaferList(0)     = [];
 0 < n -> InitWaferList(n) = wafer( n, false ) |> InitWaferList( max( n - 1, 0 ) );
 
-%===========================================================================
+%====================================================================
 % Actions
-%===========================================================================
+%====================================================================
 act
 	%Robot actions - communications
 	RobotFromSluice : RobotID # SluiceID # Wafer; %A robot starts taking a wafer from a sluicez
@@ -126,9 +126,9 @@ act
 	R2Rack_R, R2Rack_Rack : RobotID # Nat # Wafer; %RobotToRack
 	Rack2R_R, Rack2R_Rack : RobotID # Nat # Wafer; %RobotFromRack
 
-%===========================================================================
+%====================================================================
 % Process specification
-%===========================================================================
+%====================================================================
 proc
 	%RobotHandler
 	R( rID:RobotID, occupied:Bool, w:Wafer, input:WaferList, output:WaferSet, counter:Nat ) =
@@ -190,9 +190,9 @@ proc
 		sum p:Nat, r:RobotID . ( OnRack( p ) ) -> ( !IsDummy( wl . p ) ) -> Rack2R_Rack( r, p, wl . p ) . RReset_O( r ) . Rack( PutInList( wl, p, Dummy ) )
 	;
 
-%===========================================================================
+%====================================================================
 % Initialisation
-%===========================================================================
+%====================================================================
 init
 	allow({ RobotToSluice, RobotFromSluice, RobotToProjector, RobotFromProjector, RobotToRack, RobotFromRack, TreatWafer, 
 		RobotFromInput, RobotToOutput, CloseOuterDoor, CloseInnerDoor, 
