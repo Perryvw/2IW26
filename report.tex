@@ -445,12 +445,12 @@
 
         \textbf{MCF6b1}\\
         $[true^{\star}] \forall w \in Wafer, s \in SluiceID.[RobotFromSluice(Rb,s,w).\overline{RobotReset(Rb)}$ \\
-        $.CloseOuterDoor(s)]false$\\
+        $.CloseInnerDoor(s)]false$\\
         \hline
 
         \textbf{MCF6b2}\\
         $[true^{\star}] \forall w \in Wafer, s \in SluiceID.[RobotToSluice(Rb,s,w).\overline{RobotReset(Rb)}$ \\
-        $.CloseOuterDoor(s)]false$\\
+        $.CloseInnerDoor(s)]false$\\
         \hline
 
         \textbf{MCF71}\\
@@ -475,22 +475,20 @@
 
         \textbf{MCF9a}\\
         $[true^{\star}] \forall w1,w2 \in Wafer, s in SluiceID.[RobotToSluice(Ra,s,w1).\overline{RobotFromSluice(Rb,s,w1)}^{\star}$ \\
-        $.RobotToSluice(Ra,s,w2)]false$\\
+        $\exists w2 \in Wafer. RobotToSluice(Ra,s,w2)]false$\\
         \hline
 
         \textbf{MCF9b}\\
-        $[true^{\star}] \forall w1,w2 \in Wafer, s in SluiceID.[RobotToSluice(Rb,s,w1).\overline{RobotFromSluice(Ra,s,w1)}^{\star}$ \\
-        $.RobotToSluice(Rb,s,w2)]false$ \\
+        $[true^{\star}] \forall w1 \in Wafer, s \in SluiceID.[RobotToSluice(Rb,s,w1).\overline{RobotFromSluice(Ra,s,w1)}^{\star}$ \\
+        $.\exists w2 \in Wafer. RobotToSluice(Rb,s,w2)]false$ \\
         \hline
 
         \textbf{MCF10a}\\
-        $[true^{\star}] \forall w \in Wafer, s \in SluiceID. [\overline{RobotToSluice(Rb,s,w)}^{\star}.RobotFromSluice(Ra,s,w)]$ \\
-        $false$ \\
+        $\nu X(i=0). \exists s \in SluiceID. [\forall w1 \in Wafer. \overline{RobotToSluice(Rb,s,w1)} \wedge \forall w2 \in Wafer. \overline{RobotFromSluice(Ra,s,w2)}] X(i) \wedge [\forall w3 \in Wafer. RobotToSluice(Rb,s,w3)]X(i+1) \wedge [\forall w4 \in Wafer.RobotFromSluice(Ra,s,w4)](i>0 \wedge X(i-1))$ \\
         \hline
 
         \textbf{MCF10b}\\
-        $[true^{\star}] \forall w \in Wafer, s \in SluiceID. [\overline{RobotToSluice(Ra,s,w)}^{\star}.RobotFromSluice(Rb,s,w)]$ \\
-        $false$ \\
+        $\nu X(i=0). \exists s \in SluiceID. [\forall w1 \in Wafer. \overline{RobotToSluice(Ra,s,w1)} \wedge \forall w2 \in Wafer. \overline{RobotFromSluice(Rb,s,w2)}] X(i) \wedge [\forall w3 \in Wafer. RobotToSluice(Ra,s,w3)]X(i+1) \wedge [\forall w4 \in Wafer.RobotFromSluice(Rb,s,w4)](i>0 \wedge X(i-1))$ \\
         \hline
 
         \textbf{MCF11}\\
