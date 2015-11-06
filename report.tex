@@ -69,6 +69,7 @@
 		\caption{A schematic overview of the system}
 		\label{fig:overview}
 	\end{figure}
+	%TODO Rewrite, clearly indicate the system vs the controller, and this is about designing the controller.
 	The Extreme Ultraviolet (EUV) Wafer Stepper is a system developed by ASML to treat silicon wafers for the manufacturing of integrated circuits. Treating a wafer means projecting an image onto a silicon wafer with ultra violet light. Since ultra violet radiation is absorbed by air, this treatment has to happen in a vacuum to ensure the accuracy of the projection. This means wafers will have to enter and exit the system through airlocks, also referred to as sluices. The version of the system described in this document has two sluices. One robot will move wafers from the input to the airlocks or from the airlocks to the output for treated wafers from outside the vacuum chamber. One robot will move wafers from the airlocks to a buffer rack inside the vacuum chamber and vice versa for treated wafers. A last robot, located inside the vacuum chamber, takes wafers from the internal buffer rack to the projector and back once the projector is done. A schematic overview of the system can be found in figure \ref{fig:overview}.
 	\section{System components}
 	The system can be broken down into individual components to be considered by the software. These components are the following:
@@ -95,8 +96,11 @@
 		\hrule
 	}
 	
+	%TODO Add text explaining the purpose of the requirements,
+	
 	\section{Liveness requirement}
 	\begin{itemize}
+		%TODO review
 		\req{If the system is operating normally, an untreated wafer on the input rack will enter the system, and exit the system after it has been treated.}
 	\end{itemize}
 	
@@ -106,6 +110,7 @@
 		\req{The outer sluice door can only open if there is normal air pressure inside the sluice.}
 		\req{The inner sluice door can only open if there is a vacuum inside the sluice.}
 		\req{The vacuum pump can only make a vacuum if both sluice doors are closed.}
+		%TODO review
 		\req{The doors of a sluice can not close if a robot is reaching inside.}
 	\end{itemize}
 	
@@ -114,9 +119,11 @@
 		\req{Robot A may only move to a sluice if the outer door of the target sluice is open.}
 		\req{Robot B may only move to a sluice if the inside door of the target sluice is open.}
 		\req{Robot A\&B may only choose a sluice to put a wafer in that is empty.}
+		%TODO review
 		\req{Robot A\&B may only try to retrieve a wafer from an occupied sluice.}
 		\req{Robot A\&B can only put a wafer on an empty spot on the rack.}
 		\req{Robot A\&B may only target functioning sluices.}
+		%TODO review
 		\req{Robot A\&B should only try to take wafers from the rack if there are wafers available.}
 		\req{Robot B may not access the same spot on the rack as Robot C at the same time.}
 	\end{itemize}
@@ -126,6 +133,7 @@
 		\req{Robot C can not access the same spot on the rack as Robot B at the same time.}
 		\req{Robot C can not put a wafer on the projection platform when it is occupied.}
 		\req{Robot C can not take a wafer from the projection platform if the projection is not done.}
+		%TODO review
 		\req{Robot C can not put a wafer on an occupied place on the rack.}
 	\end{itemize}
 		
@@ -136,45 +144,49 @@
 	
 	\chapter{System interactions}
 \section{System actions}
+%TODO Rewrite explanation. Controller -> System interactions
 System actions are actions that the system initiates, so they are an order from the system to subsystems, and can be done at any point.
 	\begin{itemize}
-\item OpenOuterDoor(N) - Open the outer door of sluice N.
-\item CloseOuterDoor(N) - Close the outer door of sluice N.
-\item OpenInnerDoor(N) - Open the inner door of sluice N.
-\item CloseInnerDoor(N) - Close the inner door of sluice N.
-\item PumpVacuum(N) - Make a vacuum in sluice N.
-\item ReleaseVacuum(N) - Release the vacuum in sluice N.
+\item OpenOuterDoor($N$) - Open the outer door of sluice $N$.
+\item CloseOuterDoor($N$) - Close the outer door of sluice $N$.
+\item OpenInnerDoor($N$) - Open the inner door of sluice $N$.
+\item CloseInnerDoor($N$) - Close the inner door of sluice $N$.
+\item PumpVacuum($N$) - Start pumping a vacuum in sluice $N$.
+\item ReleaseVacuum($N$) - Start releasing the vacuum in sluice $N$.
 
-\item RobotFromInput( W ) - Robot A picks up wafer W from the input rack.
-\item RobotToOutput( W ) - Robot A deposits wafer W on the output rack.
+\item RobotFromInput($W$) - Robot A picks up wafer $W$ from the input rack.
+\item RobotToOutput($W$) - Robot A deposits wafer $W$ on the output rack.
 
-\item RobotToSluice( R, S, W ) - Robot R deposits wafer W it is holding in sluice S.
-\item RobotFromSluice( R, S, W ) - Robot R picks up wafer W from sluice S.
+\item RobotToSluice($R, S, W$) - Robot $R$ deposits wafer $W$ it is holding in sluice $S$.
+\item RobotFromSluice($R, S, W$) - Robot $R$ picks up wafer $W$ from sluice $S$.
 
-\item RobotToRack( R, P, W ) - Robot R deposits wafer W it is holding to position P on the buffer rack.
-\item RobotFromRack( R, P, W ) - Robot R takes wafer W from position P on the buffer rack.
+\item RobotToRack($R, P, W$) - Robot $R$ deposits wafer $W$ it is holding to position $P$ on the buffer rack.
+\item RobotFromRack($R, P, W$) - Robot $R$ takes wafer $W$ from position $P$ on the buffer rack.
 
-\item RobotToProjector( W ) - Robot C deposits wafer W it is holding on the projector.
-\item RobotFromProjector( W ) - Robot C picks up wafer W that is currently on the projector.
+\item RobotToProjector($W$) - Robot C deposits wafer $W$ it is holding on the projector.
+\item RobotFromProjector($W$) - Robot C picks up wafer $W$ that is currently on the projector.
 
-\item TreatWafer( W ) - The projector treats wafer W.
+\item TreatWafer($W$) - The projector treats wafer $W$.
 \end{itemize}
 
 	\section{System events}
+	%TODO Rewrite : System -> Controller interactions
 	This model uses the notion of system events, which are also just actions. It is assumed however that these
 	actions are only allowed when the corresponding event fires. This mean that RobotReset(R) is only allowed for a fraction of time at the moment Robot R fires the event that it has reset. If only one component relies on the event it will be used like any other action. If multiple components rely on the same event instance it will be mapped as a synchronisation communication.
 	\begin{itemize}
-\item RobotReset( R ) - Robot R has reset to its default position.
-\item OuterDoorOpened( S ) - The outer door of sluice S has completely opened.
-\item OuterDoorClosed( S ) - The outer door of sluice S has completely closed.
-\item InnerDoorOpened( S ) - The inner door of sluice S has completely opened.
-\item InnerDoorClosed( S ) - The inner door of sluice S has completely closed.
-\item VacuumDone( S ) - The vacuum in sluice S is complete.
-\item VacuumReleased( S ) - The vacuum in sluice S is completely released.
-\item WaferTreated( W ) - Wafer W is treated by the projector.
+\item RobotReset($R$) - Robot $R$ has moved to its default position.
+\item OuterDoorOpened($S$) - The outer door of sluice $S$ has completely opened.
+\item OuterDoorClosed($S$) - The outer door of sluice $S$ has completely closed.
+\item InnerDoorOpened($S$) - The inner door of sluice $S$ has completely opened.
+\item InnerDoorClosed($S$) - The inner door of sluice $S$ has completely closed.
+\item VacuumDone($S$) - The vacuum in sluice $S$ is complete.
+\item VacuumReleased($S$) - The vacuum in sluice $S$ is completely released.
+\item WaferTreated($W$) - Wafer $W$ is treated by the projector.
 	\end{itemize}
 	
 	\chapter{Requirements in terms of interactions}
+	%TODO Add explanation of what is in the chapter.
+	%TODO Fix line break in the middle of functions.
 	\section{Liveness requirement}
 	\begin{itemize}
 		\reqb{SR1}{After a RobotFromInput(w) happened a TreatWafer(w) should eventually happen, eventually happened by RobotToOutput(TreatedWafer(w))}
@@ -233,13 +245,14 @@ System actions are actions that the system initiates, so they are an order from 
 	
 	\chapter{System model}
 	\section{Model overview}
+	%TODO review (maybe expand a little bit).
 	\begin{figure}
 		\centering
 		\includegraphics[scale=0.7]{schematicoverview}
 		\caption{A schematic overview of the software components}
 		\label{fig:components}
 	\end{figure}
-	To verify the system, a model of the software to be made. The software is split up into the following three components:
+	To verify the system, a model of the software is made. The software is split up into the following three components:
 	\begin{itemize}
 	\item \textbf{SluiceManager} - This component manages the sluices, it runs parallel for each sluice. The purpose of this component is to control the individual airlocks.
 	\item \textbf{RobotManager} - This component manages the different robots in the system, and runs a parallel process for each robot.
@@ -253,7 +266,7 @@ System actions are actions that the system initiates, so they are an order from 
 	First the different sorts present in the model are defined.\\
 	%Sorts
 	\textbf{sort}\\
-	\phantom{----} Wafer = \textbf{struct} \emph{wafer}$( id:\mathbb{Z}, treated:\mathbb{B} )$;\\
+	\phantom{----} Wafer = \textbf{struct} \emph{wafer}$( id:\mathbb{Z}, treated:\mathbb{B} ) | Dummy?IsDummy$;\\
 	\phantom{----} WaferSet = Set( Wafer );\\
 	\phantom{----} WaferList = List( Wafer );\\
 	\phantom{----} RobotID = \textbf{struct} $R_a | R_b | R_c$;\\
@@ -264,28 +277,26 @@ System actions are actions that the system initiates, so they are an order from 
 	%Params
 	\textbf{eqn}\\
 	\phantom{----} RackSize = 2;\\
+	%TODO Explain X
 	\phantom{----} NumWafers = $X$;\\
 	\phantom{----} NumSluices = 2;\\
-	\phantom{----} Dummy = \emph{wafer}$( -1, false)$;\\
 	\\
-	Some helper-equations are defined, the names are self-explanatory.\\
+	Some helper-equations are defined. The names are self-explanatory.\\
 	%Helper equations
 	\textbf{eqn}\\
-	\phantom{----} IsTreated( \emph{wafer}$( w, b )$ ) = $b$;\hfill for all $w \in \mathbb{Z}, b \in \mathbb{B}$\\
-	\phantom{----} IsDummy(  \emph{wafer}$( w, b )$ ) = $w == -1$;\hfill for all $w \in \mathbb{Z}, b \in \mathbb{B}$\\
 	\phantom{----} OnRack$( p ) = 0 \leq p < \text{RackSize}$;\hfill for all $p \in \mathbb{N}$\\
 	\phantom{----} TreatedWafer(  \emph{wafer}$( w, b )$ ) =  \emph{wafer}$( w, true )$;\hfill for all $w \in \mathbb{Z}, b \in \mathbb{B}$\\
 	\\
-	\phantom{----} \emph{for all $l \in \text{WaferList}, p \in \mathbb{N}, w \in \text{Wafer}$, where OnRack($p$) = true}:\\
-	\phantom{----} PutInList$( l, p, w )$ = [];\hfill if $l=[]$\\
+	\phantom{----} \emph{For all $l \in \text{WaferList}, p \in \mathbb{N}, w \in \text{Wafer}$, where OnRack($p$) = true}:\\
+	\phantom{----} PutInList$( [], p, w )$ = [];\\
 	\phantom{----} PutInList$( l, p, w )$ = $w$ $|>$ PutInList$( tail( l ), p, w )$;\hfill if $0 < \#l \land \#l = \text{RackSize} - p$\\
 	\phantom{----} PutInList$( l, p, w )$ = $ head( l )$ $|>$ PutInList$( tail( l ), p, w )$;\hfill if $0 < \#l \land \#l \neq \text{RackSize} - p$\\
 	\\
 	\phantom{----} InitRack( 0 ) = [];\\
-	\phantom{----} InitRack( n ) = InitRack( n - 1 ) $<|$ Dummy;\hfill for all $n \in \mathbb{N}$\\
+	\phantom{----} InitRack( n ) = $Dummy |> InitRack( n - 1 )$;\hfill for all $n \in \mathbb{N}$\\
 	\\
 	\phantom{----} InitWaferList( 0 ) = [];\\
-	\phantom{----} InitWaferList( n ) = InitWaferList( n - 1 ) $<|$ \emph{wafer}($n$, \emph{false});\hfill for all $n \in \mathbb{N}$\\
+	\phantom{----} InitWaferList( n ) = \emph{wafer}($n$, \emph{false}) $|>$ InitWaferList( n - 1 );\hfill for all $n \in \mathbb{N}$\\
 	\\
 	The main part of the system model are the processes that make up the system. There is one process for each of the four components in the system. Multiple instances of each process can be run in parallel with different parameters, as explained at the initialisation.\\
 	\\%Processes
@@ -299,7 +310,7 @@ System actions are actions that the system initiates, so they are an order from 
 	\phantom{---} R( \emph{rID}:RobotID, $occupied$:$\mathbb{B}$, $w$:Wafer, $in$:WaferList, $out$:WaferSet, $c$:$\mathbb{N}$ ) =\\
 	\phantom{-------} \emph{rID} = $R_a \rightarrow$\\
 	\phantom{----------} $occupied$ $\rightarrow$\\
-	\phantom{--------------} IsTreated($w$)$\rightarrow$RobotToOutput($w$)$\cdot$RobotReset(\emph{rID})$\cdot$R(\emph{rID},$false$,Dummy,$in$,$out$+$\{w\}$,$c$)\\
+	\phantom{--------------} treated($w$)$\rightarrow$RobotToOutput($w$)$\cdot$RobotReset(\emph{rID})$\cdot$R(\emph{rID},$false$,Dummy,$in$,$out$+$\{w\}$,$c$)\\
 	\phantom{--------------} $\Diamond \sum\nolimits_{s \in \text{SluiceID}}\cdot$R2S\_R(\emph{rID},$s$,$w$)$\cdot$RReset\_O(\emph{rID})$\cdot$R(\emph{rID},$false$, Dummy,$in$,$out$,$c$+$1$)\\
 	\phantom{----------} $\Diamond$\\
 	\phantom{--------------} $in \neq [] \land c < NumSluices \rightarrow$ ( RobotFromInput( head($in$) )$\cdot$\\
@@ -308,11 +319,11 @@ System actions are actions that the system initiates, so they are an order from 
 	\\
 	\phantom{-------} + \emph{rID} = $R_b \rightarrow$\\
 	\phantom{----------} $occupied$ $\rightarrow$\\
-	\phantom{--------------} IsTreated($w$)$\rightarrow\sum\nolimits_{s\in\text{SluiceID}}$R2S\_R(\emph{rID},$s$,$w$)$\cdot$RReset\_O(\emph{rID})$\cdot$R(\emph{rID},\emph{false},Dummy,$in$,$out$,$c$)\\
+	\phantom{--------------} treated($w$)$\rightarrow\sum\nolimits_{s\in\text{SluiceID}}$R2S\_R(\emph{rID},$s$,$w$)$\cdot$RReset\_O(\emph{rID})$\cdot$R(\emph{rID},\emph{false},Dummy,$in$,$out$,$c$)\\
 	\phantom{--------------} $\Diamond \sum\nolimits_{p\in \mathbb{N}}$OnRack($p$)$\rightarrow$R2Rack\_R(\emph{rID},$p$,$w$)$\cdot$RReset\_O(\emph{rID})$\cdot$R(\emph{rID},\emph{false},Dummy,$in$,$out$,$c$)
 	\phantom{----------}  $\Diamond$\\
 	\phantom{--------------} $\sum\nolimits_{w_2 \in \text{Wafer}, s \in \text{SluiceID}}$S2R\_R(\emph{rID},$s$,$w_2$)$\cdot$RReset\_D(\emph{rID})$\cdot$R(rID,\emph{true},$w_2$,$in$,$out$,$c$)\\
-	\phantom{--------------} +$\sum\nolimits_{w_2 \in \text{Wafer}, p \in \mathbb{N}}$IsTreated($w_2$)$\land$OnRack($p$)$\rightarrow$Rack2R\_R(\emph{rID},$p$,$w_2$)$\cdot$\\
+	\phantom{--------------} +$\sum\nolimits_{w_2 \in \text{Wafer}, p \in \mathbb{N}}$treated($w_2$)$\land$OnRack($p$)$\rightarrow$Rack2R\_R(\emph{rID},$p$,$w_2$)$\cdot$\\
 	\phantom{-----------------------------} RReset(\emph{rID})$\cdot$R(\emph{rID},\emph{true},$w_2$,$in$,$out$,$c$)\\
 	\\
 	\phantom{-------} + \emph{rID} = $R_c \rightarrow$\\
@@ -320,11 +331,11 @@ System actions are actions that the system initiates, so they are an order from 
 	\phantom{--------------} R2P\_R($w$)$\cdot$RReset\_O(\emph{rID})$\cdot$P2R\_R(TreatedWafer($w$))$\cdot$RReset\_D(\emph{rID})$\cdot\sum\nolimits_{p \in \mathbb{N}}$OnRack($p$)$\rightarrow$\\
 	\phantom{------------------} R2Rack\_R(\emph{rID},$p$,TreatedWafer($w$))$\cdot$RReset\_O(\emph{rID})$\cdot$R(\emph{rID},\emph{false},Dummy,$in$,$out$,$c$)\\
 	\phantom{----------} $\Diamond$\\
-	\phantom{--------------} +$\sum\nolimits_{w_2 \in \text{Wafer}, p \in \mathbb{N}}\neg$IsTreated($w_2$)$\land$OnRack($p$)$\rightarrow$Rack2R\_R(\emph{rID},$p$,$w_2$)$\cdot$\\
+	\phantom{--------------} +$\sum\nolimits_{w_2 \in \text{Wafer}, p \in \mathbb{N}}\neg$treated($w_2$)$\land$OnRack($p$)$\rightarrow$Rack2R\_R(\emph{rID},$p$,$w_2$)$\cdot$\\
 	\phantom{-----------------------------} RReset\_D(\emph{rID})$\cdot$R(\emph{rID},\emph{true},$w_2$,$in$,$out$,$c$);
 	}\\
 	\\
-	The sluice process holds parameters for its id, if it is occupied or not, the wafer that is in that wafer, the state of the door and if the sluice is broken or not. Sluices will wait until robots have returned to their rest position before closing their doors. If there is no wafer in the sluice and the inner/outer door is open, the sluice will accept a wafer from robot B/robot A respectively and start closing. If there is a wafer in the sluice and the inner/outer door is open, the sluice will wait until robot B/robot A respectively takes the wafer out of it. If the doors of a sluice are closed and the wafer inside is treated, the sluice will release the vacuum. Once the vacuum is released it will start opening the outer doors. If the sluice doors are closed and there is an untreated wafer inside, the sluice will pumping a vacuum. If the vacuum is done the sluice will open its inner doors. On top of this the wafer could non-deterministically break at any point.\\
+	The sluice process holds parameters for its id, if it is occupied or not, the wafer that is in that wafer, the state of the door and if the sluice is broken or not. Sluices will wait until robots have returned to their rest position before closing their doors. If there is no wafer in the sluice and the inner/outer door is open, the sluice will accept a wafer from robot B/robot A respectively and start closing. If there is a wafer in the sluice and the inner/outer door is open, the sluice will wait until robot B/robot A respectively takes the wafer out of it. If the doors of a sluice are closed and the wafer inside is treated, the sluice will release the vacuum. Once the vacuum is released it will start opening the outer doors. If the sluice doors are closed and there is an untreated wafer inside, the sluice will pumping a vacuum. If the vacuum is done the sluice will open its inner doors. On top of this the sluice could non-deterministically break at any point.\\
 	Note: This protocol for the sluices means that there can never be more wafers in the vacuum chamber than the number of sluices. Therefore the spaces on the rack could be limited to the number of sluices in the system.\\
 	%Sluice
 	{\small
@@ -375,7 +386,7 @@ System actions are actions that the system initiates, so they are an order from 
 	$\nabla_{\text{ \{RobotToSluice, RobotFromSluice, RobotToProjector, RobotFromProjector, RobotToRack, RobotFromRack,}}$\\
 	\phantom{--} $_{ \text{ RobotFromInput, RobotFromOutput,}}$\\
 	\phantom{--} $_{ \text{ CloseOuterDoor, CloseInnerDoor, OpenInnerDoor, OpenOuterDoor, PumpVacuum, ReleaseVacuum,}}$\\
-	\phantom{--} $_{ \text{ RobotReset, WaferTreated, OuterDrooOpened, OuterDoorClosed, InnerDoorOpened, InnerDoorClosed, VacuumDone, VacuumReleased,}}$\\
+	\phantom{--} $_{ \text{ RobotReset, WaferTreated, OuterDoorOpened, OuterDoorClosed, InnerDoorOpened, InnerDoorClosed, VacuumDone, VacuumReleased,}}$\\
 	\phantom{--} $_{ \text{SluiceBroken\}}}$(\\
 	\phantom{---} $\Gamma_{\{R2S\_R|R2S\_S\rightarrow RobotToSluice,S2R\_S|S2R\_R\rightarrow RobotFromSluice,}$\\
 	\phantom{-----} $_{ R2P\_R|R2P\_P\rightarrow RobotToProjector, P2R\_P|P2R\_R\rightarrow RobotFromProjector,}$\\
@@ -421,7 +432,9 @@ System actions are actions that the system initiates, so they are an order from 
     \end{tabular}
     
     \pagebreak
-    
+    %TODO make this a section instead, add a little explanation.
+    %TODO Fix the weird outlining (caused by longtable?)
+    %TODO Fix requirements.
     \textbf{Modal $\mu$-calculus formulas}\\
     \begin{longtable}{p{\textwidth}}
         \textbf{MCF1}\\
@@ -553,6 +566,7 @@ System actions are actions that the system initiates, so they are an order from 
     \end{longtable}
 	
 	\section{Verification procedure}
+	%TODO Add Commands used, System specifications the tests were run on (OS etc)
 	Several steps were taken to verify the correctness of this model. First, the model was translated into mCRL2 syntax. Next, all modal formulas were translated into the mcf format used by the mCRL2 tools. Once both translations were done, a linear process specification was generated from the mCRL2 input. This LPS was used to verify the requirements by generating a parameterized boolean expression system for each modal formula and evaluating this expression.\\
 	For the verification of the system release version 201409.1.13218 of the mCRL2 tools was used.\\
 	\\
@@ -560,5 +574,8 @@ System actions are actions that the system initiates, so they are an order from 
 	
 	\section{Verification results}
 	Results of the verification: All modal formulas evaluated to true. Thus all requirements are met by the system.
+	
+	%TODO Add mcrl2 code appendix
+	%TODO Add plain-text modal formulas Appendix
 
 \end{document} 
