@@ -394,164 +394,206 @@ System actions are actions that the system initiates, so they are an order from 
 	\chapter{Verification}
 
     \section{Requirement verification}
-    
+
     \textbf{Traceability matrix}\\
     \begin{tabular}{| l | l | l | }
         \hline
         Requirement ID & System Requirement ID & Modal formula ID \\ \hline
-        R1 & SR1 & MCF1 \\ \hline 
-        R2 & SR2 & MCF2inner, MCF2outer \\ \hline 
-        R3 & SR3 & MCF3 \\ \hline 
-        R4 & SR4 & MCF4 \\ \hline 
-        R5 & SR5 & MCF5 \\ \hline 
-        R6 & SR6 & MCF6a1, MCF6a2, MCF6b1, MCF6b2 \\ \hline 
-        R7 & SR7 & MCF71, MCF72 \\ \hline 
-        R8 & SR8 & MCF82, MCF82 \\ \hline 
-        R9 & SR9 & MCF9a, MCF9b \\ \hline 
-        R10 & SR10 & MCF10a, MCF10b \\ \hline 
-        R11 & SR11 & MCF11 \\ \hline 
-        R12 & SR12 & MCF12 \\ \hline 
-        R13 & SR13 & MCF13b, MCF13c \\ \hline 
-        R14 & SR14 & MCF14 \\ \hline 
-        R15 & SR15 & MCF15 \\ \hline 
-        R16 & SR16 & MCF16 \\ \hline 
-        R17 & SR17 & MCF17 \\ \hline 
-        R18 & SR18 & MCF18 \\ \hline 
-        R19 & SR19 & MCF19 \\  \hline 
+        R1 & SR1 & MCF1 \\ \hline
+        R2 & SR2 & MCF2inner, MCF2outer \\ \hline
+        R3 & SR3 & MCF3 \\ \hline
+        R4 & SR4 & MCF4 \\ \hline
+        R5 & SR5 & MCF5 \\ \hline
+        R6 & SR6 & MCF6a1, MCF6a2, MCF6b1, MCF6b2 \\ \hline
+        R7 & SR7 & MCF71, MCF72 \\ \hline
+        R8 & SR8 & MCF82, MCF82 \\ \hline
+        R9 & SR9 & MCF9a, MCF9b \\ \hline
+        R10 & SR10 & MCF10a, MCF10b \\ \hline
+        R11 & SR11 & MCF11 \\ \hline
+        R12 & SR12 & MCF12 \\ \hline
+        R13 & SR13 & MCF13rb, MCF13rc \\ \hline
+        R14 & SR14 & MCF14 \\ \hline
+        R15 & SR15 & MCF15 \\ \hline
+        R16 & SR16 & MCF16 \\ \hline
+        R17 & SR17 & MCF17 \\ \hline
+        R18 & SR18 & MCF18 \\ \hline
+        R19 & SR19 & MCF19 \\  \hline
     \end{tabular}
-    
+
     \pagebreak
-    
+
     \textbf{Modal $\mu$-calculus formulas}\\
-    \begin{longtable}{p{\textwidth}}
-        \textbf{MCF1}\\
-        $[true^{\star}] \forall w \in Wafer. [WaferFromInput(w) . TreatWafer(w).$ \\
-        $\overline{RobotToOutput(TreatedWafer(w))}^{\star}.RobotToOutput(w)]false$\\
-        \hline
 
-        \textbf{MCF2inner}\\
-        $\forall s \in SluiceID.[true^{\star}.InnerDoorOpened(s).\overline{InnerDoorClosed(s)}^{\star}.OpenOuterDoor(s)]false$\\
-        \hline
+    \textbf{MCF1}
+    \begin{multline*}
+        [true^{\star}] \forall w \in Wafer. [WaferFromInput(w)]\\
+        \mu X.([RobotToOutput(TreatedWafer(w))]X \wedge \langle true \rangle true)
+    \end{multline*}
 
-        \textbf{MCF2outer}\\
-        $\forall s \in SluiceID.[true^{\star}.OuterDoorOpened(s).\overline{OuterDoorClosed(s)}^{\star}.OpenInnerDoor(s)]false$\\
-        \hline 
-        
-        \textbf{MCF3}\\
-        $[true^{\star}] \forall s \in SluiceID. [PumpVacuum(s).\overline{ReleaseVacuum}^{\star}.OpenOuterDoor(s)]true$\\
-        \hline
-        
-        \textbf{MCF4}\\
-        $\forall s \in SluiceID.[true^{\star}.ReleaseVacuum(s).\overline{PumpVacuum}^{\star}.OpenInnerDoor(s)]true$\\
-        \hline
-        
-        \textbf{MCF5}\\
-        $\forall s \in SluiceID.[true^{\star}.(OpenInnerDoor(s).\overline{InnerDoorClose(s)}^{\star}.PumpVacuum(s) \vee OpenOuterDoor(s).\overline{OpenOuterDoorClose(s)}^{\star}.PumpVacuum(s))]false$ \\
-        \hline
-        
-        \textbf{MCF6a1}\\
-        $[true^{\star}] \forall w \in Wafer, s \in SluiceID.[RobotFromSluice(Ra,s,w).\overline{RobotReset(Ra)}$ \\
-        $.CloseOuterDoor(s)]false$\\
-        \hline
-        
-        \textbf{MCF6a2}\\
-        $[true^{\star}] \forall w \in Wafer, s \in SluiceID.[RobotToSluice(Ra,s,w).\overline{RobotReset(Ra)}$ \\
-        $.CloseOuterDoor(s)]false$\\
-        \hline
-        
-        \textbf{MCF6b1}\\
-        $[true^{\star}] \forall w \in Wafer, s \in SluiceID.[RobotFromSluice(Rb,s,w).\overline{RobotReset(Rb)}$ \\
-        $.CloseInnerDoor(s)]false$\\
-        \hline
-        
-        \textbf{MCF6b2}\\
-        $[true^{\star}] \forall w \in Wafer, s \in SluiceID.[RobotToSluice(Rb,s,w).\overline{RobotReset(Rb)}$ \\
-        $.CloseInnerDoor(s)]false$\\
-        \hline
-        
-        \textbf{MCF71}\\
-        $[true^{\star}] \forall w \in Wafer, s \in SluiceID.[OuterDoorClosed(s).\overline{OuterDoorOpened}^{\star}$ \\ 
-        $.RobotToSluice(Ra,s,w)]false$\\
-        \hline
-        
-        \textbf{MCF72}\\
-        $[true^{\star}] \forall w \in Wafer, s \in SluiceID.[OuterDoorClosed(s).\overline{OuterDoorOpened}^{\star}$ \\
-        $.RobotFromSluice(Ra,s,w)]false$\\
-        \hline 
-        
-        \textbf{MCF81}\\
-        $[true^{\star}] \forall w \in Wafer, s \in SluiceID.[InnerDoorClosed(s).\overline{InnerDoorOpened(s)}^{\star}$ \\
-        $.RobotToSluice(Rb, s, w)]false$\\
-        \hline  
-        
-        \textbf{MCF82}\\
-        $[true^{\star}] \forall w \in Wafer, s \in SluiceID.[InnerDoorClosed(s).\overline{InnerDoorOpened(s)}^{\star}$ \\
-        $.RobotFromSluice(Rb, s, w)]false$\\
-        \hline     
-        
-        \textbf{MCF9a}\\
-        $[true^{\star}] \forall w1,w2 \in Wafer, s in SluiceID.[RobotToSluice(Ra,s,w1).\overline{RobotFromSluice(Rb,s,w1)}^{\star}$ \\
-        $\exists w2 \in Wafer. RobotToSluice(Ra,s,w2)]false$\\
-        \hline
-        
-        \textbf{MCF9b}\\
-        $[true^{\star}] \forall w1 \in Wafer, s \in SluiceID.[RobotToSluice(Rb,s,w1).\overline{RobotFromSluice(Ra,s,w1)}^{\star}$ \\
-        $.\exists w2 \in Wafer. RobotToSluice(Rb,s,w2)]false$ \\
-        \hline
-        
-        \textbf{MCF10a}\\
-        $\nu X(i=0). \exists s \in SluiceID. [\forall w1 \in Wafer. \overline{RobotToSluice(Rb,s,w1)} \wedge \forall w2 \in Wafer. \overline{RobotFromSluice(Ra,s,w2)}] X(i) \wedge [\forall w3 \in Wafer. RobotToSluice(Rb,s,w3)]X(i+1) \wedge [\forall w4 \in Wafer.RobotFromSluice(Ra,s,w4)](i>0 \wedge X(i-1))$ \\
-        \hline
-        
-        \textbf{MCF10b}\\
-        $\nu X(i=0). \exists s \in SluiceID. [\forall w1 \in Wafer. \overline{RobotToSluice(Ra,s,w1)} \wedge \forall w2 \in Wafer. \overline{RobotFromSluice(Rb,s,w2)}] X(i) \wedge [\forall w3 \in Wafer. RobotToSluice(Ra,s,w3)]X(i+1) \wedge [\forall w4 \in Wafer.RobotFromSluice(Rb,s,w4)](i>0 \wedge X(i-1))$ \\
-        \hline
-        
-        \textbf{MCF11}\\
-        $[true^{\star}] \forall p \in \mathbb{N}, r \in RobotID, w \in Wafer. [RobotToRack(r,p,w).\overline{RobotFromRack(r,p,w)}^\star$ \\
-        $.RobotToRack(r,p,w)]false$ \\
-        \hline
-        
-        \textbf{MCF12} \\
-        $[true^{\star}] \forall s \in SluiceID [SluiceBroken(n).true^{\star}.(CloseInnerDoor(s) \vee CloseOuterDoor(s) \vee OpenInnerDoor(s) \vee OpenOuterDoor(s) \vee PumpVacuum(s) \vee ReleaseVacuum(s) \vee SluiceBroken(s))]false$\\
-        \hline
-        
-        \textbf{MCF13b} \\
-        $[true^{\star}] \forall p \in \mathbb{N}, w \in Wafer.[\overline{RobotToRack(Rb,p,w}^{\star}.RobotFromRack(Rc, p, w)]false$ \\
-        \hline
-        
-        \textbf{MCF13c} \\
-        $[true^{\star}] \forall p \in \mathbb{N}, w \in Wafer.[\overline{RobotToRack(Rc,p,w}^{\star}.RobotFromRack(Rb, p, w)]false$ \\
-        \hline
-        
-        \textbf{MCF14} \\
-        $[true^{\star}] \forall p \in \mathbb{N}, w \in Wafer. [(RobotToRack(Rc,p,w) \vee RobotFromRack(Rc,p,w)).\overline{RobotReset(Rc}^{\star}.(RobotRack(Rb,p,w) \vee RobotFromRack(Rb,p,w)]false$ \\
-        \hline
-        
-        \textbf{MCF15} \\
-        $[true^{\star}] \forall p \in \mathbb{N}, w \in Wafer. [(RobotToRack(Rb,p,w) \vee RobotFromRack(Rb,p,w)).\overline{RobotReset(Rb}^{\star}.(RobotRack(Rc,p,w) \vee RobotFromRack(Rc,p,w)]false$ \\
-        \hline
-        
-        \textbf{MCF16} \\
-        $[true^{\star}] \forall w,w2 \in Wafer. [RobotToProjector(w).\overline{RobotFromProjector(w)}^{\star}$ \\
-        $.RobotToProjector(w2)]false$ \\
-        \hline
-        
-        \textbf{MCF17} \\
-        $[true^{\star}] \forall w \in Wafer. [RobotToProjector(w).\overline{TreatWafer(W)}^{\star}.RobotFromProjector(w)]false$ \\
-        \hline
-        
-        \textbf{MCF18} \\
-        $[true^{\star}] \forall w \in Wafer, p \in \mathbb{N}. [RobotToRack(Rc, p, w).\overline{RobotFromRack(Rb,p,w)}^{\star}$ \\
-        $.RobotToRack(Rc,p,w)]false$ \\
-        \hline
-        
-        \textbf{MCF19} \\
-        $[true^{\star}] \forall w \in Wafer. [RobotToProjector(w).true^{\star}.RobotFromProjector(w).true^{\star}$ \\
-        $.TreatWafer(w)]false$ \\
-        \hline
-    \end{longtable}
+    \textbf{MCF2inner}
+    \begin{multline*}
+        \forall s \in SluiceID.[true^{\star}.InnerDoorOpened(s).\overline{InnerDoorClosed(s)}^{\star}\\
+        .OpenOuterDoor(s)]false
+    \end{multline*}
+    
+    \textbf{MCF2outer}
+    \begin{multline*}
+        \forall s \in SluiceID.[true^{\star}.OuterDoorOpened(s).\overline{OuterDoorClosed(s)}^{\star}\\
+        .OpenInnerDoor(s)]false
+    \end{multline*}
+    
+    \textbf{MCF3}
+    \begin{multline*}
+        [true^{\star}] \forall s \in SluiceID. [PumpVacuum(s).\overline{ReleaseVacuum}^{\star}.OpenOuterDoor(s)]true
+    \end{multline*}
+
+    \textbf{MCF4}
+    \begin{multline*}
+        \forall s \in SluiceID.[true^{\star}.ReleaseVacuum(s).\overline{PumpVacuum}^{\star}.OpenInnerDoor(s)]true    
+    \end{multline*}
+    
+    \textbf{MCF5}
+    \begin{multline*}
+        \forall s \in SluiceID.[true^{\star}.(OpenInnerDoor(s).\overline{InnerDoorClose(s)}^{\star}.PumpVacuum(s)\\ 
+        \vee OpenOuterDoor(s).\overline{OpenOuterDoorClose(s)}^{\star}.PumpVacuum(s))]false
+    \end{multline*}
+    
+    \textbf{MCF6a1}
+    \begin{multline*}
+        [true^{\star}] \forall w \in Wafer, s \in SluiceID.[RobotFromSluice(Ra,s,w).\overline{RobotReset(Ra)}^{\star}\\
+        .CloseOuterDoor(s)]false
+    \end{multline*}
+
+    \textbf{MCF6a2}
+    \begin{multline*}
+        [true^{\star}] \forall w \in Wafer, s \in SluiceID.[RobotToSluice(Ra,s,w).\overline{RobotReset(Ra)}^{\star} \\
+        .CloseOuterDoor(s)]false
+    \end{multline*}
 	
+    \textbf{MCF6b1}
+    \begin{multline*}
+        [true^{\star}] \forall w \in Wafer, s \in SluiceID.[RobotFromSluice(Rb,s,w).\overline{RobotReset(Rb)}^{\star}\\
+        .CloseInnerDoor(s)]false
+    \end{multline*}
+
+    \textbf{MCF6b2}
+    \begin{multline*}
+        [true^{\star}] \forall w \in Wafer, s \in SluiceID.[RobotToSluice(Rb,s,w).\overline{RobotReset(Rb)}^{\star} \\
+        .CloseInnerDoor(s)]false
+    \end{multline*}
+
+    \textbf{MCF71}
+    \begin{multline*}
+        [true^{\star}] \forall w \in Wafer, s \in SluiceID.[OuterDoorClosed(s).\overline{OuterDoorOpened}^{\star} \\
+        .RobotToSluice(Ra,s,w)]false
+    \end{multline*}
+
+    \textbf{MCF72}
+    \begin{multline*}
+        [true^{\star}] \forall w \in Wafer, s \in SluiceID.[OuterDoorClosed(s).\overline{OuterDoorOpened}^{\star} \\
+        .RobotFromSluice(Ra,s,w)]false
+    \end{multline*}
+
+    \textbf{MCF81}
+    \begin{multline*}
+        [true^{\star}] \forall w \in Wafer, s \in SluiceID.[InnerDoorClosed(s).\overline{InnerDoorOpened(s)}^{\star} \\
+        .RobotToSluice(Rb, s, w)]false
+    \end{multline*}
+
+    \textbf{MCF82}
+    \begin{multline*}
+        [true^{\star}] \forall w \in Wafer, s \in SluiceID.[InnerDoorClosed(s).\overline{InnerDoorOpened(s)}^{\star} \\
+        .RobotFromSluice(Rb, s, w)]false
+    \end{multline*}
+
+    \textbf{MCF9a}
+    \begin{multline*}
+        [true^{\star}] \forall w1,w2 \in Wafer, s in SluiceID.[RobotToSluice(Ra,s,w1) \\
+        .\overline{RobotFromSluice(Rb,s,w1)}^{\star}. \exists w2 \in Wafer. RobotToSluice(Ra,s,w2)]false
+    \end{multline*}
+
+    \textbf{MCF9b}
+    \begin{multline*}
+        [true^{\star}] \forall w1 \in Wafer, s \in SluiceID.[RobotToSluice(Rb,s,w1)\\ 
+        .\overline{RobotFromSluice(Ra,s,w1)}^{\star}. \exists w2 \in Wafer. RobotToSluice(Rb,s,w2)]false
+    \end{multline*}
+
+    \textbf{MCF10a}
+    \begin{multline*}
+        \nu X(i=0). \forall s \in SluiceID. [\forall w1 \in Wafer. \overline{RobotToSluice(Rb,s,w1)} \\
+        \wedge \forall w2 \in Wafer. \overline{RobotFromSluice(Ra,s,w2)}] X(i) \\
+        \wedge [\exists w3 \in Wafer. RobotToSluice(Rb,s,w3)]X(i+1) \\ 
+        \wedge [\exists w4 \in Wafer.RobotFromSluice(Ra,s,w4)](i>0 \wedge X(i-1))
+    \end{multline*}
+
+    \textbf{MCF10b}
+    \begin{multline*}
+        \nu X(i=0). \forall s \in SluiceID. [\forall w1 \in Wafer. \overline{RobotToSluice(Ra,s,w1)} \\
+        \wedge \forall w2 \in Wafer. \overline{RobotFromSluice(Rb,s,w2)}] X(i) \\
+        \wedge [\exists w3 \in Wafer. RobotToSluice(Ra,s,w3)]X(i+1) \\ 
+        \wedge [\exists w4 \in Wafer.RobotFromSluice(Rb,s,w4)](i>0 \wedge X(i-1))
+    \end{multline*}
+
+    \textbf{MCF11}
+    \begin{multline*}
+        [true^{\star}] \forall p \in \mathbb{N}, r \in RobotID, w \in Wafer. [RobotToRack(r,p,w)\\ 
+        .\overline{RobotFromRack(r,p,w)}^\star.RobotToRack(r,p,w)]false
+    \end{multline*}
+
+    \textbf{MCF12}
+    \begin{multline*}
+        [true^{\star}] \forall s \in SluiceID [SluiceBroken(s).true^{\star}.(CloseInnerDoor(s) \\
+        \vee CloseOuterDoor(s) \vee OpenInnerDoor(s) \\
+        \vee OpenOuterDoor(s) \vee PumpVacuum(s) \\
+        \vee ReleaseVacuum(s) \vee SluiceBroken(s))]false
+    \end{multline*}
+
+    \textbf{MCF13rb}
+    \begin{multline*}
+        [true^{\star}] \forall p \in \mathbb{N}, w \in Wafer.[\overline{RobotToRack(Rb,p,w}^{\star}.RobotFromRack(Rc, p, w)]false
+    \end{multline*}
+
+    \textbf{MCF13rc}
+    \begin{multline*}
+        [true^{\star}] \forall p \in \mathbb{N}, w \in Wafer.[\overline{RobotToRack(Rc,p,w}^{\star}.RobotFromRack(Rb, p, w)]false
+    \end{multline*}
+
+    \textbf{MCF14}
+    \begin{multline*}
+        [true^{\star}] \forall p \in \mathbb{N}, w \in Wafer. [(RobotToRack(Rc,p,w) \vee RobotFromRack(Rc,p,w))\\
+        .\overline{RobotReset(Rc}^{\star}.(RobotRack(Rb,p,w) \vee RobotFromRack(Rb,p,w)]false
+    \end{multline*}
+
+    \textbf{MCF15}
+    \begin{multline*}
+        [true^{\star}] \forall p \in \mathbb{N}, w \in Wafer. [(RobotToRack(Rb,p,w) \vee RobotFromRack(Rb,p,w))\\
+        .\overline{RobotReset(Rb}^{\star}.(RobotRack(Rc,p,w) \vee RobotFromRack(Rc,p,w)]false
+    \end{multline*}
+
+    \textbf{MCF16}
+    \begin{multline*}
+        [true^{\star}] \forall w,w2 \in Wafer. [RobotToProjector(w).\overline{RobotFromProjector(w)}^{\star} \\
+        .RobotToProjector(w2)]false
+    \end{multline*}
+
+    \textbf{MCF17}
+    \begin{multline*}
+        [true^{\star}] \forall w \in Wafer. [RobotToProjector(w).\overline{TreatWafer(W)}^{\star}\\
+        .RobotFromProjector(w)]false \\
+    \end{multline*}
+
+    \textbf{MCF18}
+    \begin{multline*}
+        [true^{\star}] \forall w \in Wafer, p \in \mathbb{N}. [RobotToRack(Rc, p, w).\overline{RobotFromRack(Rb,p,w)}^{\star} \\
+        .RobotToRack(Rc,p,w)]false
+    \end{multline*}
+
+    \textbf{MCF19}
+    \begin{multline*}
+        [true^{\star}] \forall w \in Wafer. [RobotToProjector(w).true^{\star}.RobotFromProjector(w).true^{\star} \\
+        .TreatWafer(w)]false
+    \end{multline*}
+    
 	\section{Verification procedure}
 	Several steps were taken to verify the correctness of this model. First, the model was translated into mCRL2 syntax. Next, all modal formulas were translated into the mcf format used by the mCRL2 tools. Once both translations were done, a linear process specification was generated from the mCRL2 input. This LPS was used to verify the requirements by generating a parameterized boolean expression system for each modal formula and evaluating this expression.\\
 	For the verification of the system release version 201409.1.13218 of the mCRL2 tools was used.\\
