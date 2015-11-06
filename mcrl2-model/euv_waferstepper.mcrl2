@@ -2,7 +2,7 @@
 % Sort definitions
 %====================================================================
 sort 
-	Wafer = struct wafer( id:Int, treated:Bool );
+	Wafer = struct wafer( id:Int, treated:Bool ) | Dummy?IsDummy;
 	WaferSet = Set( Wafer );
 	WaferList = List( Wafer );
 	RobotID = struct Ra | Rb | Rc;
@@ -21,9 +21,6 @@ eqn NumWafers = 3;
 map NumSluices: Nat;
 eqn NumSluices = 2;
 
-map Dummy : Wafer;
-eqn Dummy = wafer( -1, false );
-
 map inputList : List( Wafer );
 eqn inputList = InitWaferList( NumWafers );
 
@@ -33,19 +30,6 @@ eqn output = {};
 %====================================================================
 % Mapping definitions
 %====================================================================
-%Return true if the wafer is treated, false otherwise
-map IsTreated : Wafer -> Bool;
-var t:Bool;
-	n:Int;
-eqn IsTreated(wafer(n, t)) = t;
-
-%Return true if the wafer is the bummy wafer, false otherwise
-map IsDummy : Wafer -> Bool;
-var t:Bool;
-	n:Int;
-eqn (n == -1) -> IsDummy( wafer( n, t ) ) = true;
-	(n != -1) -> IsDummy( wafer( n, t ) ) = false;
-
 %Return true if for position p holds 0 <= p < RackSize (p is a valid position on the rack).
 map OnRack: Nat -> Bool;
 var n:Nat;
@@ -73,7 +57,7 @@ eqn PutInList([], p, w) = [];
 map InitRack : Nat -> List( Wafer );
 var n:Nat;
 eqn InitRack( 0 ) = [];
-0 < n -> InitRack( n ) = InitRack( max( n - 1, 0 ) ) <| Dummy;
+0 < n -> InitRack( n ) = Dummy |> InitRack( max( n - 1, 0 ) );
 
 %Generate a list of wafers with incremental ids for the input
 map  InitWaferList: Nat -> WaferList;
@@ -134,7 +118,7 @@ proc
 	R( rID:RobotID, occupied:Bool, w:Wafer, input:WaferList, output:WaferSet, counter:Nat ) =
 		( rID == Ra ) -> (
 			occupied -> (
-				( IsTreated( w ) ) -> RobotToOutput( w ) . RobotReset( rID ) . R( rID, false, Dummy, input, output + {w}, counter )
+				( treated( w ) ) -> RobotToOutput( w ) . RobotReset( rID ) . R( rID, false, Dummy, input, output + {w}, counter )
 				<> ( sum s:SluiceID . R2S_R( rID, s, w ) . RReset_O( rID ) . R( rID, false, Dummy, input, output, counter + 1 ) )
 			)
 			<> (
@@ -144,19 +128,19 @@ proc
 		) + 
 		( rID == Rb ) -> (
 			occupied -> (
-				( IsTreated( w ) ) -> sum s:SluiceID . R2S_R( rID, s, w ) . RReset_O( rID ) . R( rID, false, Dummy, input, output, counter )
+				( treated( w ) ) -> sum s:SluiceID . R2S_R( rID, s, w ) . RReset_O( rID ) . R( rID, false, Dummy, input, output, counter )
 				<> sum p:Nat . ( OnRack( p ) ) -> R2Rack_R( rID, p, w ) . RReset_O( rID ) . R( rID, false, Dummy, input, output, counter )
 			)
 			<> (
 				sum w2:Wafer, s:SluiceID . S2R_R( rID, s, w2 ) . RReset_D( rID ) . R( rID, true, w2, input, output, counter ) +
-				sum w2:Wafer, p:Nat . ( IsTreated( w2 ) && OnRack( p ) ) -> Rack2R_R( rID, p, w2 ) . RReset_D( rID ) . R( rID, true, w2, input, output, counter )
+				sum w2:Wafer, p:Nat . ( treated( w2 ) && OnRack( p ) ) -> Rack2R_R( rID, p, w2 ) . RReset_D( rID ) . R( rID, true, w2, input, output, counter )
 			)
 		) +
 		( rID == Rc ) -> (
 			occupied -> 
 				( R2P_R( w ) . RReset_O( rID ) . P2R_R( TreatedWafer( w ) ) . RReset_D( rID ) . sum p:Nat . ( OnRack( p ) ) -> R2Rack_R( rID, p, TreatedWafer( w ) ) . RReset_O( rID ) . R( rID, false, Dummy, input, output, counter ) )
 			<>
-				sum w2:Wafer, p:Nat . ( !IsTreated( w2 ) && OnRack( p ) ) -> Rack2R_R( rID, p, w2 ) . RReset_D( rID ) . R( rID, true, w2, input, output, counter )
+				sum w2:Wafer, p:Nat . ( !treated( w2 ) && OnRack( p ) ) -> Rack2R_R( rID, p, w2 ) . RReset_D( rID ) . R( rID, true, w2, input, output, counter )
 		)
 	;
 
@@ -170,8 +154,8 @@ proc
 				(door == outer_open ) -> S2R_S( Ra, id, w ) . RReset_O( Ra ) . S( id, false, Dummy, door, false ) + 
 				(door == inner_open ) -> S2R_S( Rb, id, w ) . RReset_O( Rb ) . S( id, false, Dummy, door, false )
 			)) +
-			(door == closed && IsTreated( w )) -> OpenOuterDoor( id ) . OuterDoorOpened( id ) . S( id, occupied, w, outer_open, false ) +
-			(door == closed && !IsTreated( w )) -> OpenInnerDoor( id ) . InnerDoorOpened( id ) . S( id, occupied, w, inner_open, false ) +
+			(door == closed && treated( w )) -> OpenOuterDoor( id ) . OuterDoorOpened( id ) . S( id, occupied, w, outer_open, false ) +
+			(door == closed && !treated( w )) -> OpenInnerDoor( id ) . InnerDoorOpened( id ) . S( id, occupied, w, inner_open, false ) +
 			SluiceBroken( id ) . S( id, occupied, w, door, true )
 		)
 	;
