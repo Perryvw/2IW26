@@ -96,8 +96,8 @@
 		\hrule
 	}
 	
-	%TODO Add text explaining the purpose of the requirements,
-	
+	%TODO[DONE] Add text explaining the purpose of the requirements,
+	This section describes all requirements of the system. The purpose of these requirements is to make clear what the system should do and what it should not do. The resulting product must obey to all requirements. 
 	\section{Liveness requirement}
 	\begin{itemize}
 		%TODO review
@@ -610,9 +610,9 @@ System actions are actions that the system initiates, so they are an order from 
     \end{multline*}
 
 	\section{Verification procedure}
-	%TODO Add Commands used, System specifications the tests were run on (OS etc)
-	Several steps were taken to verify the correctness of this model. First, the model was translated into mCRL2 syntax. Next, all modal formulas were translated into the mcf format used by the mCRL2 tools. Once both translations were done, a linear process specification was generated from the mCRL2 input. This LPS was used to verify the requirements by generating a parameterized boolean expression system for each modal formula and evaluating this expression.\\
-	For the verification of the system release version 201409.1.13218 of the mCRL2 tools was used.\\
+	%TODO[DONE] Add Commands used, System specifications the tests were run on (OS etc)
+	Several steps were taken to verify the correctness of this model. First, the model was translated into mCRL2 syntax. Next, all modal formulas were translated into the mcf format used by the mCRL2 tools. Once both translations were done, a linear process specification was generated from the mCRL2 input (using mcrl22lps). This LPS was used to verify the requirements by generating a parameterized boolean expression system for each modal formula (using the lps2pbes tool) and evaluating this expression by running pbes2bool.\\
+	For the verification of the system release version 201409.1.13218 of the mCRL2 tools was used. Furthermore, verification process was performed on windows 7 as well as windows 8. \\
 	\\
 	The system was verified for wafer counts from 1 to 5 to avoid any statespace problems. This should nonetheless present an accurate view of the system, as the maximum amount of wafers inside the vacuum chamber is at most the number of sluices, which is two.
 	
