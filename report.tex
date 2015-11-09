@@ -90,10 +90,10 @@
 		\label{fig:overview}
 	\end{figure}
 	%TODO[DONE]
-	The Extreme Ultraviolet (EUV) Wafer Stepper is a system developed by ASML to treat silicon wafers for the manufacturing of integrated circuits. Treating a wafer means projecting an image onto a silicon wafer with ultra violet light. Since ultra violet radiation is absorbed by air, this treatment has to happen in a vacuum to ensure the accuracy of the projection. This means wafers will have to enter and exit the system through airlocks, also referred to as sluices. The version of the system considered in this document has two sluices. One robot will move wafers from the input to the airlocks or from the airlocks to the output for treated wafers from outside the vacuum chamber. One robot will move wafers from the airlocks to a buffer rack inside the vacuum chamber and vice versa for treated wafers. A last robot, located inside the vacuum chamber, takes wafers from the internal buffer rack to the projector and back once the projector is done. A schematic overview of the system can be found in figure \ref{fig:overview}.\\
+	The Extreme Ultraviolet (EUV) Wafer Stepper is a system developed by ASML to treat silicon wafers for the manufacturing of integrated circuits. A wafer is treated by projecting an image onto a silicon wafer with ultra violet light. Because ultra violet radiation is absorbed by air, this treatment has to happen in a vacuum to ensure the accuracy of the projection. This means wafers will have to enter and exit the system through airlocks, also referred to as sluices. The version of the system considered in this document has two sluices. One robot - referred to as robot A - will move untreated wafers from the input to the airlocks, or treated wafers from the airlocks to the output. Another robot - referred to as robot B - will move wafers from the airlocks to a buffer rack inside the vacuum chamber and vice versa for treated wafers. A last robot - robot C - located inside the vacuum chamber, takes wafers from the internal buffer rack to the projector and back once the projection is done. A schematic overview of the system can be found in figure \ref{fig:overview}.\\
 	\\
-	The goal of this document is to present a model for the controller software of this EUV Wafer Stepper system. This verification ensures that the system behaves according to a predefined list of requirements, which ensure the system does not damage any wafer or system components during operation.
-	\section{System components}
+	The goal of this document is to present a model for the controller software of this EUV Wafer Stepper system. This model is verified to ensure that the system behaves according to a predefined list of requirements, making sure the system does not damage any wafer or one of its own components during operation.
+	\section{Physical system components}
 	The system can be broken down into individual (physical) components to be considered by the controller software. These components are the following:
 	\begin{itemize}
 	\item \textbf{Input} - A rack containing untreated wafers located outside of the vacuum chamber.
@@ -119,7 +119,7 @@
 	}
 	
 	%TODO[DONE] Add text explaining the purpose of the requirements,
-	This chapter contains a list of requirements for the behaviour of the system, which is of course controlled by the controller that is modelled in later chapters. This controller has to ensure these requirements are not violated in the system. Each requirement is a statement about what the system should and should not do. The requirements will be translated in terms of system interactions in chapter 4, making them easier to verify.
+	This chapter contains a list of requirements for the behaviour of the system, which is of course controlled by the controller software that is modelled in later chapters. This controller has to ensure these requirements are not violated in the system. Each requirement is a statement about what the system should or should not do. The requirements will be translated in terms of system interactions in chapter 4, making them easier to verify.
 	\section{Liveness requirement}
 	\begin{itemize}
 		\req{Assuming no sluice breaks during operation, every wafer entering the system from the input will unavoidably appear treated on the output.}
@@ -283,7 +283,7 @@ These travel from the controller to the system. The controller-system interactio
 		\caption{A schematic overview of the software components}
 		\label{fig:components}
 	\end{figure}
-	To verify the controller, a model of the software is made. The software is split up into the following three components:
+	To verify the controller, a model of the software is made. The software is split up into the following four components:
 	\begin{itemize}
 	\item \textbf{SluiceManager} - This component manages the sluices, it runs parallel for each sluice. The purpose of this component is to control the individual airlocks.
 	\item \textbf{RobotManager} - This component manages the different robots in the system, and runs a parallel process for each robot.
@@ -291,9 +291,11 @@ These travel from the controller to the system. The controller-system interactio
 	\item \textbf{RackManager} - This component's purpose is to monitor the rack.
 	\end{itemize}
 	
-	A schematic view of the controller can be found in figure \ref{fig:components}. The way these separate components communicate with each other is indicated in the figure with arrows between blocks. The controller software also communicates with the physical system using the system interactions. Outgoing interactions are Controller-System interactions and incoming interactions are System-Controller interactions.
+	A schematic view of the controller can be found in figure \ref{fig:components}. The way the separate components communicate with each other is indicated in the figure with arrows between blocks. The controller software also communicates with the physical system using the system interactions. Outgoing interactions are Controller-System interactions and incoming interactions are System-Controller interactions.
 	
 	\section{Formal model}
+	To verify the controller software a model is needed. This model should serve as the basis of the actual system implementation.\\
+	\\
 	First the different sorts present in the model are defined.\\
 	%Sorts
 	\textbf{sort}\\
@@ -308,7 +310,6 @@ These travel from the controller to the system. The controller-system interactio
 	%Params
 	\textbf{eqn}\\
 	\phantom{----} RackSize = 3;\\
-	%TODO Explain X
 	\phantom{----} NumWafers = $x$; \textcolor{gray}{The program was verified for every $\{x \in \mathbb{Z} | 1 \leq x \leq 5\}$}\\
 	\phantom{----} NumSluices = 2;\\
 	\\
@@ -434,6 +435,8 @@ These travel from the controller to the system. The controller-system interactio
 	);
 	
 	\chapter{Verification}
+	
+	This chapter contains the procedure used to verify the model of the controller software. First a traceability matrix is given that links the requirements in the previous chapters to MCFs, which will be presented in the section after. The section after that gives the exact steps done during the verification process.
 
     \section{Requirement verification}
 
@@ -464,7 +467,8 @@ These travel from the controller to the system. The controller-system interactio
 
     \pagebreak
 
-    \textbf{Modal $\mu$-calculus formulas}\\
+    \section{Modal $\mu$-calculus formulas}
+    These formulas are the requirements as stated in chapter 4 (see the previous section for the exact traceability matrix), translated into modal $\mu$-calculus formulas. These formulas can be verified on the system model.
 
     \textbf{MCF1}
     \begin{multline*}
