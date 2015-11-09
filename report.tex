@@ -69,10 +69,12 @@
 		\caption{A schematic overview of the system}
 		\label{fig:overview}
 	\end{figure}
-	%TODO Rewrite, clearly indicate the system vs the controller, and this is about designing the controller.
-	The Extreme Ultraviolet (EUV) Wafer Stepper is a system developed by ASML to treat silicon wafers for the manufacturing of integrated circuits. Treating a wafer means projecting an image onto a silicon wafer with ultra violet light. Since ultra violet radiation is absorbed by air, this treatment has to happen in a vacuum to ensure the accuracy of the projection. This means wafers will have to enter and exit the system through airlocks, also referred to as sluices. The version of the system described in this document has two sluices. One robot will move wafers from the input to the airlocks or from the airlocks to the output for treated wafers from outside the vacuum chamber. One robot will move wafers from the airlocks to a buffer rack inside the vacuum chamber and vice versa for treated wafers. A last robot, located inside the vacuum chamber, takes wafers from the internal buffer rack to the projector and back once the projector is done. A schematic overview of the system can be found in figure \ref{fig:overview}.
+	%TODO[DONE]
+	The Extreme Ultraviolet (EUV) Wafer Stepper is a system developed by ASML to treat silicon wafers for the manufacturing of integrated circuits. Treating a wafer means projecting an image onto a silicon wafer with ultra violet light. Since ultra violet radiation is absorbed by air, this treatment has to happen in a vacuum to ensure the accuracy of the projection. This means wafers will have to enter and exit the system through airlocks, also referred to as sluices. The version of the system considered in this document has two sluices. One robot will move wafers from the input to the airlocks or from the airlocks to the output for treated wafers from outside the vacuum chamber. One robot will move wafers from the airlocks to a buffer rack inside the vacuum chamber and vice versa for treated wafers. A last robot, located inside the vacuum chamber, takes wafers from the internal buffer rack to the projector and back once the projector is done. A schematic overview of the system can be found in figure \ref{fig:overview}.\\
+	\\
+	The goal of this document is to present a model for the controller software of this EUV Wafer Stepper system. This verification ensures that the system behaves according to a predefined list of requirements, which ensure the system does not damage any wafer or system components during operation.
 	\section{System components}
-	The system can be broken down into individual components to be considered by the software. These components are the following:
+	The system can be broken down into individual (physical) components to be considered by the controller software. These components are the following:
 	\begin{itemize}
 	\item \textbf{Input} - A rack containing untreated wafers located outside of the vacuum chamber.
 	\item \textbf{Output} - A rack for treated wafers outside the vacuum chamber.
@@ -97,11 +99,10 @@
 	}
 	
 	%TODO[DONE] Add text explaining the purpose of the requirements,
-	This section describes all requirements of the system. The purpose of these requirements is to make clear what the system should do and what it should not do. The resulting product must obey to all requirements.
+	This chapter contains a list of requirements for the behaviour of the system, which is of course controlled by the controller that is modelled in later chapters. This controller has to ensure these requirements are not violated in the system. Each requirement is a statement about what the system should and should not do. The requirements will be translated in terms of system interactions in chapter 4, making them easier to verify.
 	\section{Liveness requirement}
 	\begin{itemize}
-		%TODO review
-		\req{If the system is operating normally, an untreated wafer on the input rack will enter the system, and exit the system after it has been treated.}
+		\req{Assuming no sluice breaks during operation, every wafer entering the system from the input will unavoidably appear treated on the output.}
 	\end{itemize}
 	
 	\section{Sluice requirements}
@@ -110,7 +111,6 @@
 		\req{The outer sluice door can only open if there is normal air pressure inside the sluice.}
 		\req{The inner sluice door can only open if there is a vacuum inside the sluice.}
 		\req{The vacuum pump can only make a vacuum if both sluice doors are closed.}
-		%TODO review
 		\req{The doors of a sluice can not close if a robot is reaching inside.}
 	\end{itemize}
 	
@@ -119,11 +119,9 @@
 		\req{Robot A may only move to a sluice if the outer door of the target sluice is open.}
 		\req{Robot B may only move to a sluice if the inside door of the target sluice is open.}
 		\req{Robot A\&B may only choose a sluice to put a wafer in that is empty.}
-		%TODO review
 		\req{Robot A\&B may only try to retrieve a wafer from an occupied sluice.}
 		\req{Robot A\&B can only put a wafer on an empty spot on the rack.}
 		\req{Robot A\&B may only target functioning sluices.}
-		%TODO review
 		\req{Robot A\&B should only try to take wafers from the rack if there are wafers available.}
 		\req{Robot B may not access the same spot on the rack as Robot C at the same time.}
 	\end{itemize}
@@ -133,8 +131,7 @@
 		\req{Robot C can not access the same spot on the rack as Robot B at the same time.}
 		\req{Robot C can not put a wafer on the projection platform when it is occupied.}
 		\req{Robot C can not take a wafer from the projection platform if the projection is not done.}
-		%TODO review
-		\req{Robot C can not put a wafer on an occupied place on the rack.}
+		\req{Robot B\&C can not put a wafer on an occupied place on the rack.}
 	\end{itemize}
 		
 	\section{Projector requirements}
@@ -143,9 +140,9 @@
 	\end{itemize}
 	
 	\chapter{System interactions}
-\section{System actions}
-%TODO Rewrite explanation. Controller -> System interactions
-System actions are actions that the system initiates, so they are an order from the system to subsystems, and can be done at any point.
+	This chapter contains the interactions the controller has with the outside world. The interactions are split up into two sections, Controller-System interactions and System-Controller interactions based on who initiates the interaction. These interaction are the base for the model of the controller software.
+\section{Controller-System interactions}
+These travel from the controller to the system. The controller-system interactions could be seen as orders to the physical system.
 	\begin{itemize}
 \item OpenOuterDoor($N$) - Open the outer door of sluice $N$.
 \item CloseOuterDoor($N$) - Close the outer door of sluice $N$.
@@ -169,10 +166,8 @@ System actions are actions that the system initiates, so they are an order from 
 \item TreatWafer($W$) - The projector treats wafer $W$.
 \end{itemize}
 
-	\section{System events}
-	%TODO Rewrite : System -> Controller interactions
-	This model uses the notion of system events, which are also just actions. It is assumed however that these
-	actions are only allowed when the corresponding event fires. This mean that RobotReset(R) is only allowed for a fraction of time at the moment Robot R fires the event that it has reset. If only one component relies on the event it will be used like any other action. If multiple components rely on the same event instance it will be mapped as a synchronisation communication.
+	\section{System-Controller interactions}
+	These interaction could be seen as events in the physical system. They travel from the system to the controller, for example to let the controller know when some order it gave to the system has been completed.
 	\begin{itemize}
 \item RobotReset($R$) - Robot $R$ has moved to its default position.
 \item OuterDoorOpened($S$) - The outer door of sluice $S$ has completely opened.
@@ -185,61 +180,77 @@ System actions are actions that the system initiates, so they are an order from 
 	\end{itemize}
 	
 	\chapter{Requirements in terms of interactions}
-	%TODO Add explanation of what is in the chapter.
-	%TODO Fix line break in the middle of functions.
+	Since the model of the controller system will consist of sequences of interactions, the requirements from chapter 2 should be translated in terms of these interactions too, to be able to verify them on the model. This chapter contains this translation from textual requirement to a requirement in terms of interactions.
 	\section{Liveness requirement}
 	\begin{itemize}
-		\reqb{SR1}{After a RobotFromInput(w) happened a TreatWafer(w) should eventually happen, eventually happened by RobotToOutput(TreatedWafer(w))}
+		\reqb{SR1}{After RobotFromInput($w$), TreatWafer($w$) should unavoidably happen, followed by RobotToOutput(TreatedWafer($w$)) within finite time.}
 	\end{itemize}
 	\section{Sluice requirements}
 	\begin{itemize}
-		\reqb{SR2}{OpenOuterDoor(N) can only happen after InnerDoorClosed(N) if no OpenInnerDoor(N) happened in between.}
-		\reqb{SR3}{OpenOuterDoor(N) can only after VacuumReleased(N) if no PumpVacuum(N) happened in between.}
-		\reqb{SR4}{OpenInnerDoor(N) can only happen after PumpVacuum(N) if no ReleaseVacuum(N) happened in between(}
-		\reqb{SR5}{PumpVacuum(N) can only happen after InnerDoorClosed(N) and OuterDoorClosed(N) if no OpenInnerDoor(N) or OpenOuterDoor(N) happened in between.}
+		\reqb{SR2}{OpenOuterDoor($N$) can only happen after InnerDoorClosed($N$) if no OpenInnerDoor($N$) happened in between.}
+		\reqb{SR3}{OpenOuterDoor($N$) can only after VacuumReleased($N$) if no PumpVacuum($N$) happened in between.}
+		\reqb{SR4}{OpenInnerDoor($N$) can only happen after PumpVacuum($N$) if no ReleaseVacuum($N$) happened in between(}
+		\reqb{SR5}{PumpVacuum($N$) can only happen after InnerDoorClosed($N$) and OuterDoorClosed($N$) if no OpenInnerDoor($N$) or OpenOuterDoor($N$) happened in between.}
 		\reqb{SR6}{
 \begin{itemize}		
-		\item CloseInnerDoor(N) can only happen after RobotReset(R) if no  RobotToSluice(R) or RobotFromSluice(R) happened in between. \emph{For R $\subset{R_a, R_b}.$}
-\item closeInnerDoor(N) can only happen if robotInSluice(N) is false.
+		\item CloseInnerDoor($N$) can only happen after RobotReset($R$) if no  RobotToSluice($R$) or RobotFromSluice($R$) happened in between.
+\item closeInnerDoor($N$) can only happen if robotInSluice($N$) is false.
 \end{itemize}		
 		}
 	\end{itemize}
 	
 	\section{Sluice robot requirements}
 	\begin{itemize}
-		\reqb{SR7}{RobotToSluice($R_a$,N,w) or RobotFromSluice($R_a$,N,w) can only happen after OuterDoorOpened(N) if no CloseOuterDoor(N) happened in between.}
-		\reqb{SR8}{RobotToSluice($R_b$,N,w) or RobotFromSluice($R_b$,N,w) can only happen after InnerDoorOpened(N) if no InnerOuterDoor(N) happened in between.}
+		\reqb{SR7}{RobotToSluice($R_a$,$N$,$w$) or RobotFromSluice($R_a$,$N$,$w$) can only happen after \\
+		OuterDoorOpened($N$) if no CloseOuterDoor(N) happened in between.}
+		\reqb{SR8}{RobotToSluice($R_b$,$N$,$w$) or RobotFromSluice($R_b$,$N$,$w$) can only happen after \\
+		InnerDoorOpened($N$) if no InnerOuterDoor(N) happened in between.}
 		\reqb{SR9}{\begin{itemize}
-		\item  RobotToSluice($R_a$, N, w) can only happen if \# RobotToSluice($R_a$, N, w) - \# RobotFromSluice($R_b$, N, w) = 0
-		\item  RobotToSluice($R_b$, N, w) can only happen if \# RobotToSluice($R_b$, N, w) - \# RobotFromSluice($R_a$, N, w) = 0
+		\item[(a)]  RobotToSluice($R_a$,$N$,$w$) can only happen if \#RobotToSluice($R_a$,$N$,$w$) -\\
+		 \#RobotFromSluice($R_b$,$N$,$w$) = 0
+		\item[(b)]  RobotToSluice($R_b$,$N$,$w$) can only happen if \#RobotToSluice($R_b$,$N$,$w$) -\\
+		 \#RobotFromSluice($R_a$,$N$,$w$) = 0
 		\end{itemize}}
 		\reqb{SR10}{\begin{itemize}
-		\item  RobotFromSluice($R_a$, N, w) can only happen if \# RobotToSluice($R_b$, N, w) - \# RobotFromSluice($R_a$, N, w) $>$ 0
-		\item  RobotFromSluice($R_b$, N, w) can only happen if \# RobotToSluice($R_a$, N, w) - \# RobotFromSluice($R_b$, N, w) $>$ 0
+		\item[(a)]  RobotFromSluice($R_a$,$N$,$w$) can only happen if \#RobotToSluice($R_b$,$N$,$w$) -\\
+		 \#RobotFromSluice($R_a$,$N$,$w$) $>$ 0
+		\item[(b)]  RobotFromSluice($R_b$,$N$,$w$) can only happen if \#RobotToSluice($R_a$,$N$,$w$) - \\
+		\#RobotFromSluice($R_b$,$N$,$w$) $>$ 0
 		\end{itemize}}
 		\reqb{SR11}{\begin{itemize}
-		\item  RobotToRack($R_a$, P, w) can only happen if \# RobotToRack($R_a$, P, w) - \# RobotFromRack($R_b$, P, w) = 0
-		\item  RobotToRack($R_b$, P, w) can only happen if \# RobotToRack($R_b$, P, w) - \# RobotFromRack($R_a$, P, w) = 0
+		\item[(a)]  RobotToRack($R_a$,$P$,$w$) can only happen if \#RobotToRack($R_a$,$P$,$w$) - \\
+		\#RobotFromRack($R_b$,$P$,$w$) = 0
+		\item[(b)]  RobotToRack($R_b$,$P$,$w$) can only happen if \#RobotToRack($R_b$,$P$,$w$) - \\
+		\#RobotFromRack($R_a$,$P$,$w$) = 0
 		\end{itemize}}
-		\reqb{SR12}{RobotToSluice(R, N, w) and RobotFromSluice(R,N,w) can only happen if SluiceBroken(N) has not happened for all \emph{For R $\subset{R_a, R_b}.$}}
+		\reqb{SR12}{RobotToSluice($R$,$N$,$w$) and RobotFromSluice($R$,$N$,$w$) can only happen if SluiceBroken($N$) has not happened.}
 		\reqb{SR13}{\begin{itemize}
-		\item  RobotFromRack($R_a$, P, w) can only happen if \# RobotToRack($R_a$, P, w) - \# RobotFromRack($R_b$, P, w) $>$ 0
-		\item  RobotFromRack($R_b$, P, w) can only happen if \# RobotToRack($R_b$, P, w) - \# RobotFromRack($R_a$, P, w) $>$ 0
+		\item[(a)]  RobotFromRack($R_a$,$P$,$w$) can only happen if \#RobotToRack($R_a$,$P$,$w$) -\\
+		 \#RobotFromRack($R_b$,$P$,$w$) $>$ 0
+		\item[(b)]  RobotFromRack($R_b$,$P$,$w$) can only happen if \#RobotToRack($R_b$,$P$,$w$) - \\
+		\#RobotFromRack($R_a$,$P$,$w$) $>$ 0
 		\end{itemize}}
-		\reqb{SR14}{RobotToRack($R_b$,P,w) can not happen after RobotToRack($R_c$,P,w) happened without RobotReset($R_c$) in between.}	\end{itemize}
+		\reqb{SR14}{RobotToRack($R_b$,$P$,$w$) can not happen after RobotToRack($R_c$,$P$,$w$) happened without RobotReset($R_c$) in between.}	\end{itemize}
 	
 	\section{Inside robot requirements}
 	\begin{itemize}
-		\reqb{SR15}{RobotToRack($R_c$,P,w) can not happen after RobotToRack($R_c$,P,w) happened without RobotReset($R_b$) in between.}	
-		\reqb{SR16}{RobotToProjector(w) can if \# RobotToProjector(w) - \# RobotFromProjector(w) = 0.}
-		\reqb{SR17}{RobotFromProjector(w) can not happen if WaferTreated(w) has not happened.}
-		\reqb{SR18}{
-		 RobotToRack($R_c$, P, w) can only happen if \# RobotToRack($R_c$, P, w) - \# RobotFromRack($R_b$, P, w) = 0}
+		\reqb{SR15}{RobotToRack($R_c$,$P$,$w$) can not happen after RobotToRack($R_c$,$P$,$w$) happened without RobotReset($R_b$) in between.}	
+		\reqb{SR16}{RobotToProjector($w$) can if \#RobotToProjector($w$) - \\
+		\#RobotFromProjector($w$) = 0.}
+		\reqb{SR17}{RobotFromProjector($w$) can not happen if WaferTreated($w$) has not happened.}
+		\reqb{SR18}{\begin{itemize}
+		\item[(a)] RobotToRack($R_b$,$P$,$w$) can only happen if \#RobotToRack($R_b$,$P$,$w$) - \\
+		\#RobotFromRack($R_b$,$P$,$w$) + \#RobotToRack($R_c$,$P$,$w$) - \\
+		\#RobotFromRack($R_c$,$P$,$w$) = 0
+		\item[(b)] RobotToRack($R_c$,$P$,$w$) can only happen if \#RobotToRack($R_b$,$P$,$w$) - \\
+		\#RobotFromRack($R_b$,$P$,$w$) + \#RobotToRack($R_c$,$P$,$w$) - \\
+		\#RobotFromRack($R_c$,$P$,$w$) = 0
+		 \end{itemize}}
 	\end{itemize}
 	\section{Projector requirements}
 	\begin{itemize}
 		\reqb{SR19}{
-				TreatWafer(w) can only happen if WaferToProject(w) happened with no WaferFromProjector(w) in between.
+				TreatWafer($w$) can only happen if WaferToProject($w$) happened with no WaferFromProjector($w$) in between.
 		}
 	\end{itemize}
 	
@@ -434,198 +445,187 @@ System actions are actions that the system initiates, so they are an order from 
     \pagebreak
 
     %TODO make this a section instead, add a little explanation.
+    %TODO Fix the weird outlining (caused by longtable?) [done]
     %TODO Fix requirements. 13,18,19 need to be looked at still
 
     \textbf{Modal $\mu$-calculus formulas}\\
 
     \textbf{MCF1}
     \begin{multline*}
-        [true^{\star}] \forall w \in \mathit{Wafer}. [\mathit{Wafer}FromInput(w)]\\
-        \mu X.([\overline{RobotToOutput(Treated\mathit{Wafer}(w))}]X \wedge \langle true \rangle true)
+        [true^{\star}] \forall w \in Wafer. [WaferFromInput(w)]\\
+        \mu X.([RobotToOutput(TreatedWafer(w))]X \wedge \langle true \rangle true)
     \end{multline*}
 
     \textbf{MCF2inner}
     \begin{multline*}
-        \forall s \in SluiceID.[true^{\star} \cdot InnerDoorOpened(s) \cdot \overline{InnerDoorClosed(s)}^{\star}\\
-         \cdot OpenOuterDoor(s)]false
+        \forall s \in SluiceID.[true^{\star}.InnerDoorOpened(s).\overline{InnerDoorClosed(s)}^{\star}\\
+        .OpenOuterDoor(s)]false
     \end{multline*}
 
     \textbf{MCF2outer}
     \begin{multline*}
-        \forall s \in SluiceID.[true^{\star} \cdot OuterDoorOpened(s) \cdot \overline{OuterDoorClosed(s)}^{\star}\\
-         \cdot OpenInnerDoor(s)]false
+        \forall s \in SluiceID.[true^{\star}.OuterDoorOpened(s).\overline{OuterDoorClosed(s)}^{\star}\\
+        .OpenInnerDoor(s)]false
     \end{multline*}
 
     \textbf{MCF3}
     \begin{multline*}
-        [true^{\star}] \forall s \in SluiceID. [PumpVacuum(s) \cdot \overline{ReleaseVacuum}^{\star} \cdot OpenOuterDoor(s)]true
+        [true^{\star}] \forall s \in SluiceID. [PumpVacuum(s).\overline{ReleaseVacuum}^{\star}.OpenOuterDoor(s)]true
     \end{multline*}
 
     \textbf{MCF4}
     \begin{multline*}
-        \forall s \in SluiceID.[true^{\star} \cdot ReleaseVacuum(s) \cdot \overline{PumpVacuum}^{\star} \cdot OpenInnerDoor(s)]true
+        \forall s \in SluiceID.[true^{\star}.ReleaseVacuum(s).\overline{PumpVacuum}^{\star}.OpenInnerDoor(s)]true
     \end{multline*}
 
     \textbf{MCF5}
     \begin{multline*}
-        \forall s \in SluiceID.[true^{\star} \cdot (OpenInnerDoor(s) \cdot \overline{InnerDoorClose(s)}^{\star} \cdot PumpVacuum(s)\\
-        \vee OpenOuterDoor(s) \cdot \overline{OpenOuterDoorClose(s)}^{\star} \cdot PumpVacuum(s))]false
+        \forall s \in SluiceID.[true^{\star}.(OpenInnerDoor(s).\overline{InnerDoorClose(s)}^{\star}.PumpVacuum(s)\\
+        \vee OpenOuterDoor(s).\overline{OpenOuterDoorClose(s)}^{\star}.PumpVacuum(s))]false
     \end{multline*}
 
     \textbf{MCF6a1}
     \begin{multline*}
-        [true^{\star}] \forall w \in \mathit{Wafer}, s \in SluiceID.[RobotFromSluice(Ra,s,w) \cdot \overline{RobotReset(Ra)}^{\star}\\
-         \cdot CloseOuterDoor(s)]false
+        [true^{\star}] \forall w \in Wafer, s \in SluiceID.[RobotFromSluice(Ra,s,w).\overline{RobotReset(Ra)}^{\star}\\
+        .CloseOuterDoor(s)]false
     \end{multline*}
 
     \textbf{MCF6a2}
     \begin{multline*}
-        [true^{\star}] \forall w \in \mathit{Wafer}, s \in SluiceID.[RobotToSluice(Ra,s,w) \cdot \overline{RobotReset(Ra)}^{\star} \\
-         \cdot CloseOuterDoor(s)]false
+        [true^{\star}] \forall w \in Wafer, s \in SluiceID.[RobotToSluice(Ra,s,w).\overline{RobotReset(Ra)}^{\star} \\
+        .CloseOuterDoor(s)]false
     \end{multline*}
 	
     \textbf{MCF6b1}
     \begin{multline*}
-        [true^{\star}] \forall w \in \mathit{Wafer}, s \in SluiceID.[RobotFromSluice(Rb,s,w) \cdot \overline{RobotReset(Rb)}^{\star}\\
-         \cdot CloseInnerDoor(s)]false
+        [true^{\star}] \forall w \in Wafer, s \in SluiceID.[RobotFromSluice(Rb,s,w).\overline{RobotReset(Rb)}^{\star}\\
+        .CloseInnerDoor(s)]false
     \end{multline*}
 
     \textbf{MCF6b2}
     \begin{multline*}
-        [true^{\star}] \forall w \in \mathit{Wafer}, s \in SluiceID.[RobotToSluice(Rb,s,w) \cdot \overline{RobotReset(Rb)}^{\star} \\
-         \cdot CloseInnerDoor(s)]false
+        [true^{\star}] \forall w \in Wafer, s \in SluiceID.[RobotToSluice(Rb,s,w).\overline{RobotReset(Rb)}^{\star} \\
+        .CloseInnerDoor(s)]false
     \end{multline*}
 
     \textbf{MCF71}
     \begin{multline*}
-        [true^{\star}] \forall w \in \mathit{Wafer}, s \in SluiceID.[OuterDoorClosed(s) \cdot \overline{OuterDoorOpened}^{\star} \\
-         \cdot RobotToSluice(Ra,s,w)]false
+        [true^{\star}] \forall w \in Wafer, s \in SluiceID.[OuterDoorClosed(s).\overline{OuterDoorOpened}^{\star} \\
+        .RobotToSluice(Ra,s,w)]false
     \end{multline*}
 
     \textbf{MCF72}
     \begin{multline*}
-        [true^{\star}] \forall w \in \mathit{Wafer}, s \in SluiceID.[OuterDoorClosed(s) \cdot \overline{OuterDoorOpened}^{\star} \\
+        [true^{\star}] \forall w \in Wafer, s \in SluiceID.[OuterDoorClosed(s).\overline{OuterDoorOpened}^{\star} \\
         .RobotFromSluice(Ra,s,w)]false
     \end{multline*}
 
     \textbf{MCF81}
     \begin{multline*}
-        [true^{\star}] \forall w \in \mathit{Wafer}, s \in SluiceID.[InnerDoorClosed(s) \cdot \overline{InnerDoorOpened(s)}^{\star} \\
-         \cdot RobotToSluice(Rb, s, w)]false
+        [true^{\star}] \forall w \in Wafer, s \in SluiceID.[InnerDoorClosed(s).\overline{InnerDoorOpened(s)}^{\star} \\
+        .RobotToSluice(Rb, s, w)]false
     \end{multline*}
 
     \textbf{MCF82}
     \begin{multline*}
-        [true^{\star}] \forall w \in \mathit{Wafer}, s \in SluiceID.[InnerDoorClosed(s) \cdot \overline{InnerDoorOpened(s)}^{\star} \\
-         \cdot RobotFromSluice(Rb, s, w)]false
+        [true^{\star}] \forall w \in Wafer, s \in SluiceID.[InnerDoorClosed(s).\overline{InnerDoorOpened(s)}^{\star} \\
+        .RobotFromSluice(Rb, s, w)]false
     \end{multline*}
 
     \textbf{MCF9a}
     \begin{multline*}
-        [true^{\star}] \forall w1,w2 \in \mathit{Wafer}, s in SluiceID.[RobotToSluice(Ra,s,w1) \\
-         \cdot \overline{RobotFromSluice(Rb,s,w1)}^{\star} \cdot  \exists w2 \in \mathit{Wafer}. RobotToSluice(Ra,s,w2)]false
+        [true^{\star}] \forall w1,w2 \in Wafer, s in SluiceID.[RobotToSluice(Ra,s,w1) \\
+        .\overline{RobotFromSluice(Rb,s,w1)}^{\star}. \exists w2 \in Wafer. RobotToSluice(Ra,s,w2)]false
     \end{multline*}
 
     \textbf{MCF9b}
     \begin{multline*}
-        [true^{\star}] \forall w1 \in \mathit{Wafer}, s \in SluiceID.[RobotToSluice(Rb,s,w1)\\
-         \cdot \overline{RobotFromSluice(Ra,s,w1)}^{\star} \cdot  \exists w2 \in \mathit{Wafer}. RobotToSluice(Rb,s,w2)]false
+        [true^{\star}] \forall w1 \in Wafer, s \in SluiceID.[RobotToSluice(Rb,s,w1)\\
+        .\overline{RobotFromSluice(Ra,s,w1)}^{\star}. \exists w2 \in Wafer. RobotToSluice(Rb,s,w2)]false
     \end{multline*}
 
     \textbf{MCF10a}
     \begin{multline*}
-        \nu X(i=0). \forall s \in SluiceID. [\forall w1 \in \mathit{Wafer}. \overline{RobotToSluice(Rb,s,w1)} \\
-        \wedge \forall w2 \in \mathit{Wafer}. \overline{RobotFromSluice(Ra,s,w2)}] X(i) \\
-        \wedge [\exists w3 \in \mathit{Wafer}. RobotToSluice(Rb,s,w3)]X(i+1) \\
-        \wedge [\exists w4 \in \mathit{Wafer}.RobotFromSluice(Ra,s,w4)](i>0 \wedge X(i-1))
+        \nu X(i=0). \forall s \in SluiceID. [\forall w1 \in Wafer. \overline{RobotToSluice(Rb,s,w1)} \\
+        \wedge \forall w2 \in Wafer. \overline{RobotFromSluice(Ra,s,w2)}] X(i) \\
+        \wedge [\exists w3 \in Wafer. RobotToSluice(Rb,s,w3)]X(i+1) \\
+        \wedge [\exists w4 \in Wafer.RobotFromSluice(Ra,s,w4)](i>0 \wedge X(i-1))
     \end{multline*}
 
     \textbf{MCF10b}
     \begin{multline*}
-        \nu X(i=0). \forall s \in SluiceID. [\forall w1 \in \mathit{Wafer}. \overline{RobotToSluice(Ra,s,w1)} \\
-        \wedge \forall w2 \in \mathit{Wafer}. \overline{RobotFromSluice(Rb,s,w2)}] X(i) \\
-        \wedge [\exists w3 \in \mathit{Wafer}. RobotToSluice(Ra,s,w3)]X(i+1) \\
-        \wedge [\exists w4 \in \mathit{Wafer}.RobotFromSluice(Rb,s,w4)](i>0 \wedge X(i-1))
+        \nu X(i=0). \forall s \in SluiceID. [\forall w1 \in Wafer. \overline{RobotToSluice(Ra,s,w1)} \\
+        \wedge \forall w2 \in Wafer. \overline{RobotFromSluice(Rb,s,w2)}] X(i) \\
+        \wedge [\exists w3 \in Wafer. RobotToSluice(Ra,s,w3)]X(i+1) \\
+        \wedge [\exists w4 \in Wafer.RobotFromSluice(Rb,s,w4)](i>0 \wedge X(i-1))
     \end{multline*}
 
     \textbf{MCF11}
     \begin{multline*}
-        [true^{\star}] \forall p \in \mathbb{N}, r \in RobotID, w \in \mathit{Wafer}. [RobotToRack(r,p,w)\\
-         \cdot \overline{RobotFromRack(r,p,w)}^{\star} \cdot RobotToRack(r,p,w)]false
+        [true^{\star}] \forall p \in \mathbb{N}, r \in RobotID, w \in Wafer. [RobotToRack(r,p,w)\\
+        .\overline{RobotFromRack(r,p,w)}^\star.RobotToRack(r,p,w)]false
     \end{multline*}
 
     \textbf{MCF12}
     \begin{multline*}
-        [true^{\star}] \forall s \in SluiceID [SluiceBroken(s) \cdot true^{\star} \cdot (CloseInnerDoor(s) \\
+        [true^{\star}] \forall s \in SluiceID [SluiceBroken(s).true^{\star}.(CloseInnerDoor(s) \\
         \vee CloseOuterDoor(s) \vee OpenInnerDoor(s) \\
         \vee OpenOuterDoor(s) \vee PumpVacuum(s) \\
         \vee ReleaseVacuum(s) \vee SluiceBroken(s))]false
     \end{multline*}
 
-    \textbf{MCF13a}
+    \textbf{MCF13rb}
     \begin{multline*}
-        [true^{\star}] \forall p \in \mathbb{N}, w \in \mathit{Wafer}.[\overline{RobotToRack(Rb,p,w}^{\star} \cdot RobotFromRack(Rc, p, w)]false
+        [true^{\star}] \forall p \in \mathbb{N}, w \in Wafer.[\overline{RobotToRack(Rb,p,w}^{\star}.RobotFromRack(Rc, p, w)]false
     \end{multline*}
 
-    \textbf{MCF13b}
+    \textbf{MCF13rc}
     \begin{multline*}
-        [true^{\star}] \forall p \in \mathbb{N}, w \in \mathit{Wafer}.[\overline{RobotToRack(Rc,p,w}^{\star} \cdot RobotFromRack(Rb, p, w)]false
+        [true^{\star}] \forall p \in \mathbb{N}, w \in Wafer.[\overline{RobotToRack(Rc,p,w}^{\star}.RobotFromRack(Rb, p, w)]false
     \end{multline*}
 
     \textbf{MCF14}
     \begin{multline*}
-        [true^{\star}] \forall p \in \mathbb{N}, w \in \mathit{Wafer}. [(RobotToRack(Rc,p,w) \vee RobotFromRack(Rc,p,w))\\
-         \cdot \overline{RobotReset(Rc}^{\star} \cdot (RobotRack(Rb,p,w) \vee RobotFromRack(Rb,p,w)]false
+        [true^{\star}] \forall p \in \mathbb{N}, w \in Wafer. [(RobotToRack(Rc,p,w) \vee RobotFromRack(Rc,p,w))\\
+        .\overline{RobotReset(Rc}^{\star}.(RobotRack(Rb,p,w) \vee RobotFromRack(Rb,p,w)]false
     \end{multline*}
 
     \textbf{MCF15}
     \begin{multline*}
-        [true^{\star}] \forall p \in \mathbb{N}, w \in \mathit{Wafer}. [(RobotToRack(Rb,p,w) \vee RobotFromRack(Rb,p,w))\\
-        .\overline{RobotReset(Rb}^{\star} \cdot (RobotRack(Rc,p,w) \vee RobotFromRack(Rc,p,w)]false
+        [true^{\star}] \forall p \in \mathbb{N}, w \in Wafer. [(RobotToRack(Rb,p,w) \vee RobotFromRack(Rb,p,w))\\
+        .\overline{RobotReset(Rb}^{\star}.(RobotRack(Rc,p,w) \vee RobotFromRack(Rc,p,w)]false
     \end{multline*}
 
     \textbf{MCF16}
     \begin{multline*}
-        [true^{\star}] \forall w,w2 \in \mathit{Wafer}. [RobotToProjector(w) \cdot \overline{RobotFromProjector(w)}^{\star} \\
-         \cdot RobotToProjector(w2)]false
+        [true^{\star}] \forall w,w2 \in Wafer. [RobotToProjector(w).\overline{RobotFromProjector(w)}^{\star} \\
+        .RobotToProjector(w2)]false
     \end{multline*}
 
     \textbf{MCF17}
     \begin{multline*}
-        [true^{\star}] \forall w \in \mathit{Wafer}. [RobotToProjector(w) \cdot \overline{Treat\mathit{Wafer}(W)}^{\star}\\
-         \cdot RobotFromProjector(w)]false \\
+        [true^{\star}] \forall w \in Wafer. [RobotToProjector(w).\overline{TreatWafer(W)}^{\star}\\
+        .RobotFromProjector(w)]false \\
     \end{multline*}
 
-    \textbf{MCF18a}
+    \textbf{MCF18}
     \begin{multline*}
-        [true^{\star}] \forall w \in \mathit{Wafer}, p \in \mathbb{N}. [RobotToRack(Rc, p, w) \cdot \overline{RobotFromRack(Rb,p,w)}^{\star} \\
-         \cdot RobotToRack(Rc,p,w)]false
-    \end{multline*}
-    
-    \textbf{MCF18b}
-    \begin{multline*}
-        [true^{\star}] \forall w \in \mathit{Wafer}, p \in \mathbb{N}. [RobotToRack(Rc, p, w) \cdot \overline{RobotFromRack(Rb,p,w)}^{\star} \\
-         \cdot RobotToRack(Rc,p,w)]false
+        [true^{\star}] \forall w \in Wafer, p \in \mathbb{N}. [RobotToRack(Rc, p, w).\overline{RobotFromRack(Rb,p,w)}^{\star} \\
+        .RobotToRack(Rc,p,w)]false
     \end{multline*}
 
     \textbf{MCF19}
     \begin{multline*}
-        [true^{\star}] \forall w \in \mathit{\mathit{Wafer}}. [RobotFromProjector(w) \cdot  \forall w1 \in \mathit{Wafer}. \overline{RobotToProjector(w1)}^{\star} \\
-        . \exists w2 \in \mathit{Wafer}. Treat\mathit{Wafer}(w2)]false
+        [true^{\star}] \forall w \in Wafer. [RobotToProjector(w).true^{\star}.RobotFromProjector(w).true^{\star} \\
+        .TreatWafer(w)]false
     \end{multline*}
 
 	\section{Verification procedure}
 	%TODO[DONE] Add Commands used, System specifications the tests were run on (OS etc)
 	Several steps were taken to verify the correctness of this model. First, the model was translated into mCRL2 syntax. Next, all modal formulas were translated into the mcf format used by the mCRL2 tools. Once both translations were done, a linear process specification was generated from the mCRL2 input (using mcrl22lps). This LPS was used to verify the requirements by generating a parameterized boolean expression system for each modal formula (using the lps2pbes tool) and evaluating this expression by running pbes2bool.\\
-	For the verification of the system release version 201409.1.13218 of the mCRL2 tools was used. \\
-
+	For the verification of the system release version 201409.1.13218 of the mCRL2 tools was used. Furthermore, verification process was performed on windows 7 as well as windows 8. \\
+	\\
 	The system was verified for wafer counts from 1 to 5 to avoid any statespace problems. This should nonetheless present an accurate view of the system, as the maximum amount of wafers inside the vacuum chamber is at most the number of sluices, which is two.
-
-    \textbf{Verification environment}
-    The environment on which the model was checked using the modal formulas is given in table.
-
-    \subsection{Commands}
-    
 	
 	\section{Verification results}
 	Results of the verification: All modal formulas evaluated to true. Thus all requirements are met by the system.
