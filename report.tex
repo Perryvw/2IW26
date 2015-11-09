@@ -530,13 +530,14 @@ These travel from the controller to the system. The controller-system interactio
 
     \textbf{MCF7a}
     \begin{multline*}
-        \forall w \in \mathit{Wafer}, s \in SluiceID.[true^{\star} \cdot OuterDoorClosed(s) \cdot \overline{OuterDoorOpened}^{\star} \\
+        \forall w \in \mathit{Wafer}, s \in SluiceID.[true^{\star} \cdot OuterDoorClosed(s) \cdot \overline{OuterDoorOpened(s)}^{\star} \\
         \cdot RobotToSluice(Ra,s,w)]false
     \end{multline*}
 
     \textbf{MCF7b}
     \begin{multline*}
-        \forall w \in \mathit{Wafer}, s \in SluiceID.[true^{\star} \cdot OuterDoorClosed(s) \cdot \overline{OuterDoorOpened}^{\star} \\
+        \forall w \in \mathit{Wafer}, s \in SluiceID.[true^{\star} \cdot OuterDoorClosed(s) \cdot \overline{OuterDoorOpened(s)}^{\star} \\
+       \cdot RobotFromSluice(Ra,s,w)]false
     \end{multline*}
 
     \textbf{MCF8a}
@@ -547,13 +548,13 @@ These travel from the controller to the system. The controller-system interactio
 
     \textbf{MCF8b}
     \begin{multline*}
-        forall w \in \mathit{Wafer}, s \in SluiceID.[true^{\star} \cdot InnerDoorClosed(s) \cdot \overline{InnerDoorOpened(s)}^{\star} \\
+        \forall w \in \mathit{Wafer}, s \in SluiceID.[true^{\star} \cdot InnerDoorClosed(s) \cdot \overline{InnerDoorOpened(s)}^{\star} \\
         \cdot RobotFromSluice(Rb, s, w)]false
     \end{multline*}
 
     \textbf{MCF9a}
     \begin{multline*}
-        \forall w1,w2 \in \mathit{Wafer}, s in SluiceID.[true^{\star} \cdot RobotToSluice(Ra,s,w1) \\
+        \forall w1 \in \mathit{Wafer}, s \in SluiceID.[true^{\star} \cdot RobotToSluice(Ra,s,w1) \\
         \cdot \overline{RobotFromSluice(Rb,s,w1)}^{\star} \cdot  \exists w2 \in \mathit{Wafer}. RobotToSluice(Ra,s,w2)]false
     \end{multline*}
 
