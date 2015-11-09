@@ -526,13 +526,13 @@ These travel from the controller to the system. The controller-system interactio
 
     \textbf{MCF7a}
     \begin{multline*}
-        \forall w \in \mathit{Wafer}, s \in SluiceID.[true^{\star} \cdot OuterDoorClosed(s) \cdot \overline{OuterDoorOpened}^{\star} \\
+        \forall w \in \mathit{Wafer}, s \in SluiceID.[true^{\star} \cdot OuterDoorClosed(s) \cdot \overline{OuterDoorOpened(s)}^{\star} \\
         \cdot RobotToSluice(Ra,s,w)]false
     \end{multline*}
 
     \textbf{MCF7b}
     \begin{multline*}
-        \forall w \in \mathit{Wafer}, s \in SluiceID.[true^{\star} \cdot OuterDoorClosed(s) \cdot \overline{OuterDoorOpened}^{\star} \\
+        \forall w \in \mathit{Wafer}, s \in SluiceID.[true^{\star} \cdot OuterDoorClosed(s) \cdot \overline{OuterDoorOpened(s)}^{\star} \\
        \cdot RobotFromSluice(Ra,s,w)]false
     \end{multline*}
 
