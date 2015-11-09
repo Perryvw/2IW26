@@ -21,7 +21,25 @@
 \usepackage{colortbl}
 \usepackage{amsfonts}
 \newcounter{counter}
+\usepackage{xcolor}
 \usepackage{listings}
+\lstloadlanguages{[LaTeX]TeX, [primitive]TeX,fortran}
+\lstset{language={[LaTeX]TeX},
+      escapeinside={{(*@}{@*)}}, 
+       gobble=0,
+       stepnumber=1,numbersep=5pt, 
+       numberstyle={\footnotesize\color{gray}},%firstnumber=last,
+      breaklines=true,
+      framesep=5pt,
+      basicstyle=\small\ttfamily,
+      showstringspaces=false,
+      keywordstyle=\ttfamily\textcolor{blue},
+      stringstyle=\color{orange},
+      commentstyle=\color{black},
+      rulecolor=\color{gray!10},
+      breakatwhitespace=true,
+      showspaces=false  % shows spacing symbol
+    }
 
 %\linenumbers
 \modulolinenumbers[5]
@@ -632,5 +650,153 @@ These travel from the controller to the system. The controller-system interactio
 	
 	%TODO Add mcrl2 code appendix
 	%TODO Add plain-text modal formulas Appendix
+	\section{Appendix A}
+	\textbf{Modal $\mu$-calculus formulas in plain text}\\
 
+    \textbf{MCF1}
+    \begin{lstlisting}
+    	[true*] forall w: Wafer. [RobotFromInput(w)] mu X. ([!RobotToOutput(TreatedWafer(w))]X && <true>true)
+    \end{lstlisting}
+
+    \textbf{MCF2inner}
+    \begin{lstlisting}
+       forall s: SluiceID . [true* . InnerDoorOpened(s) . (!InnerDoorClosed(s))* . OpenOuterDoor(s)] false
+       \end{lstlisting}
+
+    \textbf{MCF2outer}
+    \begin{lstlisting}
+       forall s: SluiceID . [true* . OuterDoorOpened(s) . (!OuterDoorClosed(s))* . OpenInnerDoor(s)] false
+       \end{lstlisting}
+
+    \textbf{MCF3}
+    \begin{lstlisting}
+       [true*] forall s: SluiceID . [ PumpVacuum(s) . (!ReleaseVacuum(s))* .  OpenOuterDoor(s)] true
+       \end{lstlisting}
+
+    \textbf{MCF4}
+    \begin{lstlisting}
+        forall s: SluiceID . [true* . ReleaseVacuum(s) . (!PumpVacuum(s))* .  OpenInnerDoor(s)] true
+        \end{lstlisting}
+
+    \textbf{MCF5}
+    \begin{lstlisting}
+       forall s: SluiceID . [true* . (OpenInnerDoor(s). (!InnerDoorClosed(s))* . PumpVacuum(s)  + OpenOuterDoor(s). (!OuterDoorClosed(s))* . PumpVacuum(s))] false
+       \end{lstlisting}
+
+    \textbf{MCF6a1}
+    \begin{lstlisting}
+       [true*] forall w:Wafer, s:SluiceID . [RobotFromSluice(Ra,s,w) . (!RobotReset(Ra))* . CloseOuterDoor(s)] false
+       \end{lstlisting}
+
+    \textbf{MCF6a2}
+    \begin{lstlisting}
+       [true*] forall w:Wafer, s:SluiceID . [RobotToSluice(Ra,s,w) . (!RobotReset(Ra))* . CloseOuterDoor(s)] false
+    \end{lstlisting}
+	
+    \textbf{MCF6b1}
+    \begin{lstlisting}
+      [true*] forall w:Wafer, s:SluiceID . [RobotFromSluice(Rb,s,w) . (!RobotReset(Rb))* . CloseInnerDoor(s)] false
+    \end{lstlisting}
+
+    \textbf{MCF6b2}
+    \begin{lstlisting}
+        [true*] forall w:Wafer, s:SluiceID . [RobotToSluice(Rb,s,w) . (!RobotReset(Rb))* . CloseInnerDoor(s)] false
+    \end{lstlisting}
+
+    \textbf{MCF71}
+    \begin{lstlisting}
+       [true*] forall  s:SluiceID . [OuterDoorClosed(s) . (!OuterDoorOpened(s))* ] forall w:Wafer . [RobotToSluice(Ra, s, w)] false
+    \end{lstlisting}
+
+    \textbf{MCF72}
+    \begin{lstlisting}
+       [true*] forall  s:SluiceID . [OuterDoorClosed(s) . (!OuterDoorOpened(s))* ] forall w:Wafer . [RobotFromSluice(Ra, s, w)] false
+    \end{lstlisting}
+
+    \textbf{MCF81}
+    \begin{lstlisting}
+        [true*] forall  s:SluiceID . [InnerDoorClosed(s) . (!InnerDoorOpened(s))* ] forall w:Wafer . [RobotToSluice(Rb, s, w)] false
+    \end{lstlisting}
+
+    \textbf{MCF82}
+    \begin{lstlisting}
+     [true*] forall  s:SluiceID . [InnerDoorClosed(s) . (!InnerDoorOpened(s))* ] forall w:Wafer . [RobotFromSluice(Rb, s, w)] false
+    \end{lstlisting}
+
+    \textbf{MCF9a}
+    \begin{lstlisting}
+       [true*] forall w1:Wafer, s:SluiceID . [RobotToSluice(Ra,s,w1) . (!RobotFromSluice(Rb,s,w1))* . exists w2: Wafer . RobotToSluice(Ra,s,w2)] false
+    \end{lstlisting}
+
+    \textbf{MCF9b}
+    \begin{lstlisting}
+       [true*] forall w1:Wafer, s:SluiceID . [RobotToSluice(Rb,s,w1) . (!RobotFromSluice(Ra,s,w1))* . exists w2: Wafer . RobotToSluice(Rb,s,w2)] false
+    \end{lstlisting}
+
+    \textbf{MCF10a}
+    \begin{lstlisting}
+       nu X( i:Int=0 ). forall w1,w2:Wafer. forall s:SluiceID. [!RobotToSluice(Rb,s,w1) && !RobotFromSluice(Ra,s,w2)]X(i) && exists w3: Wafer. [RobotToSluice(Rb,s,w3)]X(i+1) && exists w4: Wafer .[RobotFromSluice(Ra,s,w4)](val(i > 0) && X(i-1)) 
+    \end{lstlisting}
+
+    \textbf{MCF10b}
+    \begin{lstlisting}
+nu X( i:Int=0 ). forall w1,w2:Wafer. forall s:SluiceID. [!RobotToSluice(Ra,s,w1) && !RobotFromSluice(Rb,s,w2)] X(i) && exists w3: Wafer . [ RobotToSluice(Ra,s,w3)]X(i+1) && exists w4: Wafer .[RobotFromSluice(Rb,s,w4)](val(i > 0) && X(i-1))
+    \end{lstlisting}
+
+    \textbf{MCF11}
+    \begin{lstlisting}
+       [true*] forall p:Nat, r:RobotID, w:Wafer. [RobotToRack(r,p,w).(!RobotFromRack( r,p,w)) .RobotToRack(r,p,w)]false
+    \end{lstlisting}
+
+    \textbf{MCF12}
+    \begin{lstlisting}
+       [true*] forall s:SluiceID. [SluiceBroken(s).true*.(CloseInnerDoor(s) + CloseOuterDoor(s) + OpenInnerDoor(s) + OpenOuterDoor(s) + PumpVacuum(s) + ReleaseVacuum(s) + SluiceBroken(s))]false
+    \end{lstlisting}
+
+    \textbf{MCF13a}
+    \begin{lstlisting}
+     nu X( i:Int=0 ). forall w1,w2:Wafer. forall p:Nat. val(p<=RackSize)=> [!RobotToRack(Rb,p,w1) && !RobotFromRack(Rc,p,w2)] X(i) 
+&& exists w3:Wafer . [RobotToRack(Rb,p,w3)]X(i+1) && exists w4:Wafer . [RobotFromRack(Rc,p,w4)](val(i > 0) && X(i-1))
+    \end{lstlisting}
+
+    \textbf{MCF13b}
+    \begin{lstlisting}
+       nu X( i:Int=0 ). forall w1,w2,w3,w4:Wafer. forall p:Nat. val(p<=RackSize)=> [!RobotToRack(Rc,p,w1) && !RobotFromRack(Rb,p,w2)] X(i) 
+&& [RobotToRack(Rc,p,w3)]X(i+1) && [RobotFromRack(Rb,p,w4)] (val(i > 0) && X(i-1))
+   \end{lstlisting}
+
+    \textbf{MCF14}
+    \begin{lstlisting}
+      [true*] forall p:Nat, w:Wafer. [(RobotToRack(Rc,p,w) + RobotFromRack(Rc,p,w)).(!RobotReset(Rc))* . (RobotToRack(Rb,p,w) + RobotFromRack( Rb, p, w ))]false
+    \end{lstlisting}
+
+    \textbf{MCF15}
+    \begin{lstlisting}
+       [true*] forall p:Nat, w:Wafer. [(RobotToRack(Rb,p,w) + RobotFromRack(Rb,p,w)). (!RobotReset(Rb))*.(RobotToRack(Rc,p,w) + RobotFromRack(Rc,p,w))]false
+    \end{lstlisting}
+
+    \textbf{MCF16}
+    \begin{lstlisting}
+       [true*] forall w:Wafer. [RobotToProjector(w). (!RobotFromProjector(w))*] exists w2:Wafer. [RobotToProjector(w2)]false
+    \end{lstlisting}
+
+    \textbf{MCF17}
+    \begin{lstlisting}
+        [true*] forall w:Wafer. [RobotToProjector(w). (!TreatWafer(w))*.RobotFromProjector(w)]false
+    \end{lstlisting}
+
+    \textbf{MCF18a}
+    \begin{lstlisting}
+      [true*] forall w:Wafer, p:Nat. [RobotToRack(Rb,p,w).(!RobotFromRack(Rb,p,w) && !RobotFromRack(Rc,p,w))*] exists w2:Wafer. [RobotToRack(Rb,p,w2)]false
+    \end{lstlisting}
+    
+    \textbf{MCF18b}
+    \begin{lstlisting}
+       [true*] forall w:Wafer, p:Nat. [RobotToRack(Rc,p,w).(!RobotFromRack(Rb,p,w) && !RobotFromRack(Rc,p,w))*] exists w2:Wafer.[RobotToRack(Rc,p,w2)]false
+    \end{lstlisting}
+
+    \textbf{MCF19}
+    \begin{lstlisting}
+       [true*] forall w:Wafer. [RobotFromProjector(w). forall w1:Wafer. (!RobotToProjector(w1))*. exists w2: Wafer. TreatWafer( w2 )]false
+       \end{lstlisting}
 \end{document} 
