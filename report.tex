@@ -658,12 +658,12 @@ These travel from the controller to the system. The controller-system interactio
     	[true*] forall w: Wafer. [RobotFromInput(w)] mu X. ([!RobotToOutput(TreatedWafer(w))]X && <true>true)
     \end{lstlisting}
 
-    \textbf{MCF2inner}
+    \textbf{MCF2a}
     \begin{lstlisting}
        forall s: SluiceID . [true* . InnerDoorOpened(s) . (!InnerDoorClosed(s))* . OpenOuterDoor(s)] false
        \end{lstlisting}
 
-    \textbf{MCF2outer}
+    \textbf{MCF2b}
     \begin{lstlisting}
        forall s: SluiceID . [true* . OuterDoorOpened(s) . (!OuterDoorClosed(s))* . OpenInnerDoor(s)] false
        \end{lstlisting}
@@ -703,22 +703,22 @@ These travel from the controller to the system. The controller-system interactio
         [true*] forall w:Wafer, s:SluiceID . [RobotToSluice(Rb,s,w) . (!RobotReset(Rb))* . CloseInnerDoor(s)] false
     \end{lstlisting}
 
-    \textbf{MCF71}
+    \textbf{MCF7a}
     \begin{lstlisting}
        [true*] forall  s:SluiceID . [OuterDoorClosed(s) . (!OuterDoorOpened(s))* ] forall w:Wafer . [RobotToSluice(Ra, s, w)] false
     \end{lstlisting}
 
-    \textbf{MCF72}
+    \textbf{MCF7b}
     \begin{lstlisting}
        [true*] forall  s:SluiceID . [OuterDoorClosed(s) . (!OuterDoorOpened(s))* ] forall w:Wafer . [RobotFromSluice(Ra, s, w)] false
     \end{lstlisting}
 
-    \textbf{MCF81}
+    \textbf{MCF8a}
     \begin{lstlisting}
         [true*] forall  s:SluiceID . [InnerDoorClosed(s) . (!InnerDoorOpened(s))* ] forall w:Wafer . [RobotToSluice(Rb, s, w)] false
     \end{lstlisting}
 
-    \textbf{MCF82}
+    \textbf{MCF8b}
     \begin{lstlisting}
      [true*] forall  s:SluiceID . [InnerDoorClosed(s) . (!InnerDoorOpened(s))* ] forall w:Wafer . [RobotFromSluice(Rb, s, w)] false
     \end{lstlisting}
