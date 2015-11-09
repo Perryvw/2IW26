@@ -211,8 +211,8 @@ These travel from the controller to the system. The controller-system interactio
 		\reqb{SR5}{PumpVacuum($N$) can only happen after InnerDoorClosed($N$) and OuterDoorClosed($N$) if no OpenInnerDoor($N$) or OpenOuterDoor($N$) happened in between.}
 		\reqb{SR6}{
 \begin{itemize}		
-		\item CloseInnerDoor($N$) can only happen after RobotReset($R$) if no  RobotToSluice($R$) or RobotFromSluice($R$) happened in between.
-\item closeInnerDoor($N$) can only happen if robotInSluice($N$) is false.
+		\item[(a)] CloseInnerDoor($N$) can only happen after RobotReset($R$) if no  RobotToSluice($R$) or RobotFromSluice($R$) happened in between.
+\item[(b)] closeInnerDoor($N$) can only happen if robotInSluice($N$) is false.
 \end{itemize}		
 		}
 	\end{itemize}
