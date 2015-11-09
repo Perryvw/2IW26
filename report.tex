@@ -554,14 +554,16 @@ These travel from the controller to the system. The controller-system interactio
 
     \textbf{MCF9a}
     \begin{multline*}
-        \forall w1 \in \mathit{Wafer}, s \in SluiceID.[true^{\star} \cdot RobotToSluice(Ra,s,w1) \\
-        \cdot \overline{RobotFromSluice(Rb,s,w1)}^{\star} \cdot  \exists w2 \in \mathit{Wafer}. RobotToSluice(Ra,s,w2)]false
+        \forall w1 \in \mathit{Wafer}, s \in SluiceID.[true^{\star} \cdot (RobotToSluice(Rb,s,w2) \cup RobotToSluice(Ra,s,w2)) \\
+        \cdot \overline{RobotFromSluice(Ra,s,w1) \cup RobotFromSluice(Rb,s,w1))}^{\star} \\ 
+        \cdot  \exists w2 \in \mathit{Wafer}. (RobotToSluice(Rb,s,w2) \cup RobotToSluice(Ra,s,w2))]false
     \end{multline*}
 
     \textbf{MCF9b}
     \begin{multline*}
-        \forall w1 \in \mathit{Wafer}, s \in SluiceID.[true^{\star} \cdot RobotToSluice(Rb,s,w1)\\
-        \cdot \overline{RobotFromSluice(Ra,s,w1)}^{\star} \cdot  \exists w2 \in \mathit{Wafer}. RobotToSluice(Rb,s,w2)]false
+        \forall w1 \in \mathit{Wafer}, s \in SluiceID.[true^{\star} \cdot (RobotToSluice(Rb,s,w2) \cup RobotToSluice(Ra,s,w2))\\
+        \cdot \overline{RobotFromSluice(Ra,s,w1) \cup RobotFromSluice(Rb,s,w1)}^{\star} \\ 
+        \cdot  \exists w2 \in \mathit{Wafer}. (RobotToSluice(Rb,s,w2) \cup RobotToSluice(Ra,s,w2))]false
     \end{multline*}
 
     \textbf{MCF10a}
