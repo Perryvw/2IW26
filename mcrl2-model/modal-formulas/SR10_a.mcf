@@ -2,5 +2,5 @@
 % Robot A may only try to retrieve a wafer from an occupied sluice.
 
 
-nu X( i:Int=0 ). exists s:SluiceID. [forall w1: Wafer . !RobotToSluice(Rb,s,w1) && forall w2: Wafer . !RobotFromSluice(Ra,s,w2)] X(i) && [forall w3: Wafer . RobotToSluice(Rb,s,w3)]X(i+1) && [forall w4: Wafer .RobotFromSluice(Ra,s,w4)](val(i > 0) && X(i-1))
+nu X( i:Int=0 ). forall s:SluiceID. [forall w1: Wafer . !RobotToSluice(Rb,s,w1) && forall w2: Wafer . !RobotFromSluice(Ra,s,w2)] X(i) && [exists w3: Wafer . RobotToSluice(Rb,s,w3)]X(i+1) && [exists w4: Wafer .RobotFromSluice(Ra,s,w4)](val(i > 0) && X(i-1))
  

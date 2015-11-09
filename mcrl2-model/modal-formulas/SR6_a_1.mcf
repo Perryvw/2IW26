@@ -1,4 +1,4 @@
 % This formula expresses that
 % The doors of a sluice can not close if robot A is inside the sluice
 
-[true*] forall w:Wafer, s:SluiceID . [RobotFromSluice(Ra, s, w) . (!RobotReset(Ra)) . CloseOuterDoor(s)] false
+[true*] forall w:Wafer, s:SluiceID . [RobotFromSluice(Ra, s, w) . (!RobotReset(Ra))* . CloseOuterDoor(s)] false
