@@ -1,0 +1,3 @@
+% This formula expresses SR18.
+
+[true*] forall w:Wafer, p:Nat. [RobotToRack( Rb, p, w).(!RobotFromRack( Rb, p, w) && !RobotFromRack( Rc, p, w))*] exists w2:Wafer.[RobotToRack( Rb, p, w2)]false

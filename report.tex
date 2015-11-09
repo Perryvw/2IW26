@@ -562,12 +562,12 @@ System actions are actions that the system initiates, so they are an order from 
         \vee ReleaseVacuum(s) \vee SluiceBroken(s))]false
     \end{multline*}
 
-    \textbf{MCF13rb}
+    \textbf{MCF13a}
     \begin{multline*}
         [true^{\star}] \forall p \in \mathbb{N}, w \in \mathit{Wafer}.[\overline{RobotToRack(Rb,p,w}^{\star} \cdot RobotFromRack(Rc, p, w)]false
     \end{multline*}
 
-    \textbf{MCF13rc}
+    \textbf{MCF13b}
     \begin{multline*}
         [true^{\star}] \forall p \in \mathbb{N}, w \in \mathit{Wafer}.[\overline{RobotToRack(Rc,p,w}^{\star} \cdot RobotFromRack(Rb, p, w)]false
     \end{multline*}
@@ -596,7 +596,13 @@ System actions are actions that the system initiates, so they are an order from 
          \cdot RobotFromProjector(w)]false \\
     \end{multline*}
 
-    \textbf{MCF18}
+    \textbf{MCF18a}
+    \begin{multline*}
+        [true^{\star}] \forall w \in \mathit{Wafer}, p \in \mathbb{N}. [RobotToRack(Rc, p, w) \cdot \overline{RobotFromRack(Rb,p,w)}^{\star} \\
+         \cdot RobotToRack(Rc,p,w)]false
+    \end{multline*}
+    
+    \textbf{MCF18b}
     \begin{multline*}
         [true^{\star}] \forall w \in \mathit{Wafer}, p \in \mathbb{N}. [RobotToRack(Rc, p, w) \cdot \overline{RobotFromRack(Rb,p,w)}^{\star} \\
          \cdot RobotToRack(Rc,p,w)]false
