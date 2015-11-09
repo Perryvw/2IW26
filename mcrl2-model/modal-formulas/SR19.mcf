@@ -1,4 +1,4 @@
 % This formula expresses SR19.
 % treatWafer can only happen after robotCTreatWafer if no robotCRetrieve happened after that.
 
-[true*] forall w:Wafer. [RobotToProjector( w ).true*.RobotFromProjector( w ).true*.TreatWafer( w )]false
+[true*] forall w:Wafer. [RobotFromProjector( w ). forall w1:Wafer. (!RobotToProjector(w1))*. exists w2: Wafer. TreatWafer( w2 )]false
