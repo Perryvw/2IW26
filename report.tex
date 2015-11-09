@@ -274,14 +274,13 @@ These travel from the controller to the system. The controller-system interactio
 	
 	\chapter{System model}
 	\section{Model overview}
-	%TODO review (maybe expand a little bit).
 	\begin{figure}
 		\centering
 		\includegraphics[scale=0.7]{schematicoverview}
 		\caption{A schematic overview of the software components}
 		\label{fig:components}
 	\end{figure}
-	To verify the system, a model of the software is made. The software is split up into the following three components:
+	To verify the controller, a model of the software is made. The software is split up into the following three components:
 	\begin{itemize}
 	\item \textbf{SluiceManager} - This component manages the sluices, it runs parallel for each sluice. The purpose of this component is to control the individual airlocks.
 	\item \textbf{RobotManager} - This component manages the different robots in the system, and runs a parallel process for each robot.
@@ -289,7 +288,7 @@ These travel from the controller to the system. The controller-system interactio
 	\item \textbf{RackManager} - This component's purpose is to monitor the rack.
 	\end{itemize}
 	
-	A schematic view of this system can also be found in figure \ref{fig:components}.
+	A schematic view of the controller can be found in figure \ref{fig:components}. The way these separate components communicate with each other is indicated in the figure with arrows between blocks. The controller software also communicates with the physical system using the system interactions. Outgoing interactions are Controller-System interactions and incoming interactions are System-Controller interactions.
 	
 	\section{Formal model}
 	First the different sorts present in the model are defined.\\
@@ -648,10 +647,14 @@ These travel from the controller to the system. The controller-system interactio
 	\section{Verification results}
 	Results of the verification: All modal formulas evaluated to true. Thus all requirements are met by the system.
 	
-	%TODO Add mcrl2 code appendix
-	%TODO Add plain-text modal formulas Appendix
-	\section{Appendix A}
-	\textbf{Modal $\mu$-calculus formulas in plain text}\\
+	\chapter{Appendix A}
+	This appendix contains the mCRL2 code for the verified model.
+	
+	\lstinputlisting[breaklines=true,basicstyle=\small]{mcrl2-model/euv_waferstepper.mcrl2}
+
+	
+	\chapter{Appendix B}
+	This appendix contains the modal formulas used to verify the model, in plain text.
 
     \textbf{MCF1}
     \begin{lstlisting}
