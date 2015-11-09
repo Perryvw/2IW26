@@ -10,6 +10,7 @@
 \usepackage{enumitem}
 \usepackage{url}
 \usepackage{caption}
+\usepackage{listings}
 \usepackage[parfill]{parskip}
 \usepackage{appendix}
 \usepackage{subcaption}
@@ -669,7 +670,26 @@ These travel from the controller to the system. The controller-system interactio
 	The system was verified for wafer counts from 1 to 5 to avoid any state space problems. This should nonetheless present an accurate view of the system, as the maximum amount of wafers inside the vacuum chamber is at most the number of sluices, which is two.
 
     \subsection{Commands}
-	
+	The testing procedure in terms of mcrl2 command line commands is given here.\\
+
+    \textbf{.mcrl2 to .lps using mcrl22lps:}\\
+    \begin{lstlisting}
+        mcrl22lps.exe euv_waferstepper.mcrl2 euv_waferstepper.lps --lin-method=regular --rewriter=jitty --verbose
+    \end{lstlisting}
+    
+    The obtained \textbf{.lps} file is then used to generate parameterized boolean equation systems using the modal formulas and the model, which are then evaluated to true or false.\\
+    Consider the following modal formula names: SR1.mcf, SR2a.mcf, SR2b.mcf, SR3.mcf, SR4.mcf, SR5.mcf, SR6a1.mcf, SR6a2.mcf, SR6b1.mcf, SR6b2.mcf, SR7a.mcf, SR7b.mcf, SR8a.mcf, SR8b.mcf, SR9a.mcf, SR9b.mcf, SR10a.mcf, SR10b.mcf, SR11.mcf, SR12.mcf, SR13a.mcf, SR13b.mcf, SR14.mcf, SR15.mcf, SR16.mcf, SR17.mcf, SR18a.mcf, SR18b.mcf, SR19.mcf.
+    
+    We then do the following command to generate the \textbf{.pbes} file, we do this for each of the files specified, we refer to them in the command as modal\_formula\_filename:\\
+     \begin{lstlisting}
+        lps2pbes.exe euv_waferstepper.lps euv_waferstepper.pbes --formula=../<modal_formula_filename> --verbose
+    \end{lstlisting}   
+    
+    And to evaluate the truth of the formula against the modal formula we do the following command:\\
+    \begin{lstlisting}
+        pbes2bool.exe euv_waferstepper.pbes --erase=none --rewriter=jitty --search=breadth-first --strategy=0 --verbose
+    \end{lstlisting} 
+    
 	\section{Verification results}
 	Results of the verification: All modal formulas evaluated to true. Thus all requirements are met by the system.
 	
