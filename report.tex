@@ -772,7 +772,7 @@ nu X( i:Int=0 ). forall w1,w2:Wafer. forall s:SluiceID. [!RobotToSluice(Ra,s,w1)
 
     \textbf{MCF15}
     \begin{lstlisting}
-       [true*] forall p:Nat, w:Wafer. [(RobotToRack(Rb,p,w) + RobotFromRack( Rb, p, w )). (!RobotReset(Rb))*.(RobotToRack( Rc,p,w) + RobotFromRack(Rc,p,w))]false
+       [true*] forall p:Nat, w:Wafer. [(RobotToRack(Rb,p,w) + RobotFromRack(Rb,p,w)). (!RobotReset(Rb))*.(RobotToRack(Rc,p,w) + RobotFromRack(Rc,p,w))]false
     \end{lstlisting}
 
     \textbf{MCF16}
