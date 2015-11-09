@@ -1,5 +1,5 @@
 % This formula expresses that
 % A Wafer will eventually exit the system treated.
 
-[true*] forall w: Wafer. [RobotFromInput(w)] mu X.([RobotFromInput(TreatedWafer(w))]X && <true>true)
+[true*] forall w: Wafer. [RobotFromInput(w)] mu X.([!RobotToOutput(TreatedWafer(w))]X && <true>true)
 
