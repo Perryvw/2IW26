@@ -651,7 +651,7 @@ System actions are actions that the system initiates, so they are an order from 
 	%TODO Add mcrl2 code appendix
 	%TODO Add plain-text modal formulas Appendix
 	\section{Appendix A}
-	\textbf{Modal $\mu$-calculus formulas}\\
+	\textbf{Modal $\mu$-calculus formulas in plain text}\\
 
     \textbf{MCF1}
     \begin{lstlisting}
@@ -660,7 +660,7 @@ System actions are actions that the system initiates, so they are an order from 
 
     \textbf{MCF2inner}
     \begin{lstlisting}
-       forall s: SluiceID . [true* . InnerDoorOpened(s) . (!InnerDoorClosed(s))* . OpenOuterDoor(s)\] false
+       forall s: SluiceID . [true* . InnerDoorOpened(s) . (!InnerDoorClosed(s))* . OpenOuterDoor(s)] false
        \end{lstlisting}
 
     \textbf{MCF2outer}
@@ -685,17 +685,17 @@ System actions are actions that the system initiates, so they are an order from 
 
     \textbf{MCF6a1}
     \begin{lstlisting}
-       [true*] forall w:Wafer, s:SluiceID . [RobotFromSluice(Ra, s, w) . (!RobotReset(Ra))* . CloseOuterDoor(s)] false
+       [true*] forall w:Wafer, s:SluiceID . [RobotFromSluice(Ra,s,w) . (!RobotReset(Ra))* . CloseOuterDoor(s)] false
        \end{lstlisting}
 
     \textbf{MCF6a2}
     \begin{lstlisting}
-       [true*] forall w:Wafer, s:SluiceID . [RobotToSluice(Ra, s, w) . (!RobotReset(Ra))* . CloseOuterDoor(s)] false
+       [true*] forall w:Wafer, s:SluiceID . [RobotToSluice(Ra,s,w) . (!RobotReset(Ra))* . CloseOuterDoor(s)] false
     \end{lstlisting}
 	
     \textbf{MCF6b1}
     \begin{lstlisting}
-      [true*] forall w:Wafer, s:SluiceID . [RobotFromSluice(Rb, s, w) . (!RobotReset(Rb))* . CloseInnerDoor(s)] false
+      [true*] forall w:Wafer, s:SluiceID . [RobotFromSluice(Rb,s,w) . (!RobotReset(Rb))* . CloseInnerDoor(s)] false
     \end{lstlisting}
 
     \textbf{MCF6b2}
@@ -725,17 +725,17 @@ System actions are actions that the system initiates, so they are an order from 
 
     \textbf{MCF9a}
     \begin{lstlisting}
-       [true*] forall w1:Wafer, s:SluiceID . [RobotToSluice(Ra, s, w1) . (!RobotFromSluice(Rb, s,w1))* . exists w2: Wafer . RobotToSluice(Ra, s, w2)] false
+       [true*] forall w1:Wafer, s:SluiceID . [RobotToSluice(Ra,s,w1) . (!RobotFromSluice(Rb,s,w1))* . exists w2: Wafer . RobotToSluice(Ra,s,w2)] false
     \end{lstlisting}
 
     \textbf{MCF9b}
     \begin{lstlisting}
-       [true*] forall w1:Wafer, s:SluiceID . [RobotToSluice(Rb,s,w1) . (!RobotFromSluice(Ra, s,w1))* . exists w2: Wafer . RobotToSluice(Rb, s, w2)] false
+       [true*] forall w1:Wafer, s:SluiceID . [RobotToSluice(Rb,s,w1) . (!RobotFromSluice(Ra,s,w1))* . exists w2: Wafer . RobotToSluice(Rb,s,w2)] false
     \end{lstlisting}
 
     \textbf{MCF10a}
     \begin{lstlisting}
-       nu X( i:Int=0 ). forall w1,w2:Wafer. forall s:SluiceID. [!RobotToSluice(Rb,s,w1) && !RobotFromSluice(Ra,s,w2)] X(i) && exists w3: Wafer . [RobotToSluice(Rb,s,w3)]X(i+1) && exists w4: Wafer .[RobotFromSluice(Ra,s,w4)](val(i > 0) && X(i-1)) 
+       nu X( i:Int=0 ). forall w1,w2:Wafer. forall s:SluiceID. [!RobotToSluice(Rb,s,w1) && !RobotFromSluice(Ra,s,w2)]X(i) && exists w3: Wafer. [RobotToSluice(Rb,s,w3)]X(i+1) && exists w4: Wafer .[RobotFromSluice(Ra,s,w4)](val(i > 0) && X(i-1)) 
     \end{lstlisting}
 
     \textbf{MCF10b}
