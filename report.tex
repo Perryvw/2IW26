@@ -13,6 +13,7 @@
 \usepackage[parfill]{parskip}
 \usepackage{appendix}
 \usepackage{subcaption}
+\usepackage[font=small,labelfont=bf]{caption}
 \usepackage{color}
 \usepackage{booktabs}
 \usepackage{lineno}
@@ -185,8 +186,7 @@ System actions are actions that the system initiates, so they are an order from 
 	\end{itemize}
 	
 	\chapter{Requirements in terms of interactions}
-	%TODO Add explanation of what is in the chapter.
-	%TODO Fix line break in the middle of functions.
+
 	\section{Liveness requirement}
 	\begin{itemize}
 		\reqb{SR1}{After a RobotFromInput(w) happened a TreatWafer(w) should eventually happen, eventually happened by RobotToOutput(TreatedWafer(w))}
@@ -411,23 +411,23 @@ System actions are actions that the system initiates, so they are an order from 
         \hline
         Requirement ID & System Requirement ID & Modal formula ID \\ \hline
         R1 & SR1 & MCF1 \\ \hline
-        R2 & SR2 & MCF2inner, MCF2outer \\ \hline
+        R2 & SR2 & MCF2a, MCF2b \\ \hline
         R3 & SR3 & MCF3 \\ \hline
         R4 & SR4 & MCF4 \\ \hline
         R5 & SR5 & MCF5 \\ \hline
         R6 & SR6 & MCF6a1, MCF6a2, MCF6b1, MCF6b2 \\ \hline
-        R7 & SR7 & MCF71, MCF72 \\ \hline
-        R8 & SR8 & MCF82, MCF82 \\ \hline
+        R7 & SR7 & MCF7a, MCF7b \\ \hline
+        R8 & SR8 & MCF8a, MCF8b \\ \hline
         R9 & SR9 & MCF9a, MCF9b \\ \hline
         R10 & SR10 & MCF10a, MCF10b \\ \hline
         R11 & SR11 & MCF11 \\ \hline
         R12 & SR12 & MCF12 \\ \hline
-        R13 & SR13 & MCF13rb, MCF13rc \\ \hline
+        R13 & SR13 & MCF13a, MCF13b \\ \hline
         R14 & SR14 & MCF14 \\ \hline
         R15 & SR15 & MCF15 \\ \hline
         R16 & SR16 & MCF16 \\ \hline
         R17 & SR17 & MCF17 \\ \hline
-        R18 & SR18 & MCF18 \\ \hline
+        R18 & SR18 & MCF18a, MCF18b \\ \hline
         R19 & SR19 & MCF19 \\  \hline
     \end{tabular}
 
@@ -440,17 +440,17 @@ System actions are actions that the system initiates, so they are an order from 
 
     \textbf{MCF1}
     \begin{multline*}
-        [true^{\star}] \forall w \in \mathit{Wafer}. [\mathit{Wafer}FromInput(w)]\\
+        \forall w \in \mathit{Wafer}. [true^{\star} \cdot \mathit{Wafer}FromInput(w)]\\
         \mu X.([\overline{RobotToOutput(Treated\mathit{Wafer}(w))}]X \wedge \langle true \rangle true)
     \end{multline*}
 
-    \textbf{MCF2inner}
+    \textbf{MCF2a}
     \begin{multline*}
         \forall s \in SluiceID.[true^{\star} \cdot InnerDoorOpened(s) \cdot \overline{InnerDoorClosed(s)}^{\star}\\
          \cdot OpenOuterDoor(s)]false
     \end{multline*}
 
-    \textbf{MCF2outer}
+    \textbf{MCF2b}
     \begin{multline*}
         \forall s \in SluiceID.[true^{\star} \cdot OuterDoorOpened(s) \cdot \overline{OuterDoorClosed(s)}^{\star}\\
          \cdot OpenInnerDoor(s)]false
@@ -458,7 +458,7 @@ System actions are actions that the system initiates, so they are an order from 
 
     \textbf{MCF3}
     \begin{multline*}
-        [true^{\star}] \forall s \in SluiceID. [PumpVacuum(s) \cdot \overline{ReleaseVacuum}^{\star} \cdot OpenOuterDoor(s)]true
+        \forall s \in SluiceID. [true^{\star} \cdot PumpVacuum(s) \cdot \overline{ReleaseVacuum}^{\star} \cdot OpenOuterDoor(s)]true
     \end{multline*}
 
     \textbf{MCF4}
@@ -474,62 +474,62 @@ System actions are actions that the system initiates, so they are an order from 
 
     \textbf{MCF6a1}
     \begin{multline*}
-        [true^{\star}] \forall w \in \mathit{Wafer}, s \in SluiceID.[RobotFromSluice(Ra,s,w) \cdot \overline{RobotReset(Ra)}^{\star}\\
-         \cdot CloseOuterDoor(s)]false
+        \forall w \in \mathit{Wafer}, s \in SluiceID.[true^{\star} \cdot RobotFromSluice(Ra,s,w) \cdot \overline{RobotReset(Ra)}^{\star}\\
+        \cdot CloseOuterDoor(s)]false
     \end{multline*}
 
     \textbf{MCF6a2}
     \begin{multline*}
-        [true^{\star}] \forall w \in \mathit{Wafer}, s \in SluiceID.[RobotToSluice(Ra,s,w) \cdot \overline{RobotReset(Ra)}^{\star} \\
-         \cdot CloseOuterDoor(s)]false
+        \forall w \in \mathit{Wafer}, s \in SluiceID.[true^{\star} \cdot RobotToSluice(Ra,s,w) \cdot \overline{RobotReset(Ra)}^{\star} \\
+        \cdot CloseOuterDoor(s)]false
     \end{multline*}
 	
     \textbf{MCF6b1}
     \begin{multline*}
-        [true^{\star}] \forall w \in \mathit{Wafer}, s \in SluiceID.[RobotFromSluice(Rb,s,w) \cdot \overline{RobotReset(Rb)}^{\star}\\
-         \cdot CloseInnerDoor(s)]false
+        \forall w \in \mathit{Wafer}, s \in SluiceID.[true^{\star} \cdot RobotFromSluice(Rb,s,w) \cdot \overline{RobotReset(Rb)}^{\star}\\
+        \cdot CloseInnerDoor(s)]false
     \end{multline*}
 
     \textbf{MCF6b2}
     \begin{multline*}
-        [true^{\star}] \forall w \in \mathit{Wafer}, s \in SluiceID.[RobotToSluice(Rb,s,w) \cdot \overline{RobotReset(Rb)}^{\star} \\
-         \cdot CloseInnerDoor(s)]false
+        \forall w \in \mathit{Wafer}, s \in SluiceID.[true^{\star} \cdot RobotToSluice(Rb,s,w) \cdot \overline{RobotReset(Rb)}^{\star} \\
+        \cdot CloseInnerDoor(s)]false
     \end{multline*}
 
-    \textbf{MCF71}
+    \textbf{MCF7a}
     \begin{multline*}
-        [true^{\star}] \forall w \in \mathit{Wafer}, s \in SluiceID.[OuterDoorClosed(s) \cdot \overline{OuterDoorOpened}^{\star} \\
-         \cdot RobotToSluice(Ra,s,w)]false
+        \forall w \in \mathit{Wafer}, s \in SluiceID.[true^{\star} \cdot OuterDoorClosed(s) \cdot \overline{OuterDoorOpened}^{\star} \\
+        \cdot RobotToSluice(Ra,s,w)]false
     \end{multline*}
 
-    \textbf{MCF72}
+    \textbf{MCF7b}
     \begin{multline*}
-        [true^{\star}] \forall w \in \mathit{Wafer}, s \in SluiceID.[OuterDoorClosed(s) \cdot \overline{OuterDoorOpened}^{\star} \\
+        \forall w \in \mathit{Wafer}, s \in SluiceID.[true^{\star} \cdot OuterDoorClosed(s) \cdot \overline{OuterDoorOpened}^{\star} \\
         .RobotFromSluice(Ra,s,w)]false
     \end{multline*}
 
-    \textbf{MCF81}
+    \textbf{MCF8a}
     \begin{multline*}
-        [true^{\star}] \forall w \in \mathit{Wafer}, s \in SluiceID.[InnerDoorClosed(s) \cdot \overline{InnerDoorOpened(s)}^{\star} \\
-         \cdot RobotToSluice(Rb, s, w)]false
+        \forall w \in \mathit{Wafer}, s \in SluiceID.[true^{\star} \cdot InnerDoorClosed(s) \cdot \overline{InnerDoorOpened(s)}^{\star} \\
+        \cdot RobotToSluice(Rb, s, w)]false
     \end{multline*}
 
-    \textbf{MCF82}
+    \textbf{MCF8b}
     \begin{multline*}
-        [true^{\star}] \forall w \in \mathit{Wafer}, s \in SluiceID.[InnerDoorClosed(s) \cdot \overline{InnerDoorOpened(s)}^{\star} \\
-         \cdot RobotFromSluice(Rb, s, w)]false
+        forall w \in \mathit{Wafer}, s \in SluiceID.[true^{\star} \cdot InnerDoorClosed(s) \cdot \overline{InnerDoorOpened(s)}^{\star} \\
+        \cdot RobotFromSluice(Rb, s, w)]false
     \end{multline*}
 
     \textbf{MCF9a}
     \begin{multline*}
-        [true^{\star}] \forall w1,w2 \in \mathit{Wafer}, s in SluiceID.[RobotToSluice(Ra,s,w1) \\
-         \cdot \overline{RobotFromSluice(Rb,s,w1)}^{\star} \cdot  \exists w2 \in \mathit{Wafer}. RobotToSluice(Ra,s,w2)]false
+        \forall w1,w2 \in \mathit{Wafer}, s in SluiceID.[true^{\star} \cdot RobotToSluice(Ra,s,w1) \\
+        \cdot \overline{RobotFromSluice(Rb,s,w1)}^{\star} \cdot  \exists w2 \in \mathit{Wafer}. RobotToSluice(Ra,s,w2)]false
     \end{multline*}
 
     \textbf{MCF9b}
     \begin{multline*}
-        [true^{\star}] \forall w1 \in \mathit{Wafer}, s \in SluiceID.[RobotToSluice(Rb,s,w1)\\
-         \cdot \overline{RobotFromSluice(Ra,s,w1)}^{\star} \cdot  \exists w2 \in \mathit{Wafer}. RobotToSluice(Rb,s,w2)]false
+        \forall w1 \in \mathit{Wafer}, s \in SluiceID.[true^{\star} \cdot RobotToSluice(Rb,s,w1)\\
+        \cdot \overline{RobotFromSluice(Ra,s,w1)}^{\star} \cdot  \exists w2 \in \mathit{Wafer}. RobotToSluice(Rb,s,w2)]false
     \end{multline*}
 
     \textbf{MCF10a}
@@ -550,13 +550,13 @@ System actions are actions that the system initiates, so they are an order from 
 
     \textbf{MCF11}
     \begin{multline*}
-        [true^{\star}] \forall p \in \mathbb{N}, r \in RobotID, w \in \mathit{Wafer}. [RobotToRack(r,p,w)\\
+        \forall p \in \mathbb{N}, r \in RobotID, w \in \mathit{Wafer}. [true^{\star} \cdot RobotToRack(r,p,w)\\
          \cdot \overline{RobotFromRack(r,p,w)}^{\star} \cdot RobotToRack(r,p,w)]false
     \end{multline*}
 
     \textbf{MCF12}
     \begin{multline*}
-        [true^{\star}] \forall s \in SluiceID [SluiceBroken(s) \cdot true^{\star} \cdot (CloseInnerDoor(s) \\
+        \forall s \in SluiceID [true^{\star} \cdot SluiceBroken(s) \cdot true^{\star} \cdot (CloseInnerDoor(s) \\
         \vee CloseOuterDoor(s) \vee OpenInnerDoor(s) \\
         \vee OpenOuterDoor(s) \vee PumpVacuum(s) \\
         \vee ReleaseVacuum(s) \vee SluiceBroken(s))]false
@@ -564,65 +564,83 @@ System actions are actions that the system initiates, so they are an order from 
 
     \textbf{MCF13a}
     \begin{multline*}
-        [true^{\star}] \forall p \in \mathbb{N}, w \in \mathit{Wafer}.[\overline{RobotToRack(Rb,p,w}^{\star} \cdot RobotFromRack(Rc, p, w)]false
+        \nu X(i=0). \forall w1,w2 \in \mathit{Wafer}. \forall p \in \mathbb{N}. \\
+        (p \leq RackSize) \rightarrow [\overline{RobotToRack(Rb,p,w1) \cup RobotToRack(Rc,p,w1)}]X(i) \\
+        \wedge \exists w3 \in \mathit{Wafer}. [RobotToRack(Rb,p,w3)]X(i+1) \\
+        \wedge \exists w4 \in \mathit{Wafer}. [RobotFromRack(Rc,p,w4)]((i>0) \wedge X(i-1))
     \end{multline*}
 
     \textbf{MCF13b}
     \begin{multline*}
-        [true^{\star}] \forall p \in \mathbb{N}, w \in \mathit{Wafer}.[\overline{RobotToRack(Rc,p,w}^{\star} \cdot RobotFromRack(Rb, p, w)]false
+        \nu X(i=0). \forall w1,w2 \in \mathit{Wafer}. \forall p \in \mathbb{N}. \\
+        (p \leq RackSize) \rightarrow [\overline{RobotToRack(Rc,p,w1) \cup RobotToRack(Rb,p,w1)}]X(i) \\
+        \wedge \exists w3 \in \mathit{Wafer}. [RobotToRack(Rc,p,w3)]X(i+1) \\
+        \wedge \exists w4 \in \mathit{Wafer}. [RobotFromRack(Rb,p,w4)]((i>0) \wedge X(i-1))
     \end{multline*}
 
     \textbf{MCF14}
     \begin{multline*}
-        [true^{\star}] \forall p \in \mathbb{N}, w \in \mathit{Wafer}. [(RobotToRack(Rc,p,w) \vee RobotFromRack(Rc,p,w))\\
-         \cdot \overline{RobotReset(Rc}^{\star} \cdot (RobotRack(Rb,p,w) \vee RobotFromRack(Rb,p,w)]false
+        \forall p \in \mathbb{N}, w \in \mathit{Wafer}. [true^{\star} \cdot(RobotToRack(Rc,p,w) \vee RobotFromRack(Rc,p,w))\\
+        \cdot \overline{RobotReset(Rc)}^{\star} \cdot ((RobotRack(Rb,p,w) \vee RobotFromRack(Rb,p,w))]false
     \end{multline*}
 
     \textbf{MCF15}
     \begin{multline*}
-        [true^{\star}] \forall p \in \mathbb{N}, w \in \mathit{Wafer}. [(RobotToRack(Rb,p,w) \vee RobotFromRack(Rb,p,w))\\
-        .\overline{RobotReset(Rb}^{\star} \cdot (RobotRack(Rc,p,w) \vee RobotFromRack(Rc,p,w)]false
+        \forall p \in \mathbb{N}, w \in \mathit{Wafer}. [true^{\star} \cdot (RobotToRack(Rb,p,w) \vee RobotFromRack(Rb,p,w))\\
+        .\overline{RobotReset(Rb)}^{\star} \cdot ((RobotRack(Rc,p,w) \vee RobotFromRack(Rc,p,w))]false
     \end{multline*}
 
     \textbf{MCF16}
     \begin{multline*}
-        [true^{\star}] \forall w,w2 \in \mathit{Wafer}. [RobotToProjector(w) \cdot \overline{RobotFromProjector(w)}^{\star} \\
-         \cdot RobotToProjector(w2)]false
+        \forall w,w2 \in \mathit{Wafer}. [true^{\star} \cdot RobotToProjector(w) \cdot \overline{RobotFromProjector(w)}^{\star} \\
+        \cdot RobotToProjector(w2)]false
     \end{multline*}
 
     \textbf{MCF17}
     \begin{multline*}
-        [true^{\star}] \forall w \in \mathit{Wafer}. [RobotToProjector(w) \cdot \overline{Treat\mathit{Wafer}(W)}^{\star}\\
-         \cdot RobotFromProjector(w)]false \\
+        \forall w \in \mathit{Wafer}. [true^{\star} \cdot RobotToProjector(w) \cdot \overline{Treat\mathit{Wafer}(w)}^{\star} \\
+        \cdot RobotFromProjector(w)]false
     \end{multline*}
 
     \textbf{MCF18a}
     \begin{multline*}
-        [true^{\star}] \forall w \in \mathit{Wafer}, p \in \mathbb{N}. [RobotToRack(Rc, p, w) \cdot \overline{RobotFromRack(Rb,p,w)}^{\star} \\
-         \cdot RobotToRack(Rc,p,w)]false
+        \forall w \in \mathit{Wafer}, p \in \mathbb{N}. [true^{\star} \cdot RobotToRack(Rb, p, w) \\
+        \cdot \overline{(RobotFromRack(Rb,p,w) \cup (RobotFromRack(Rc,p,w))}^{\star}] \\
+        \exists w':Wafer. RobotToRack(Rb,p,w')]false
     \end{multline*}
-    
+
     \textbf{MCF18b}
     \begin{multline*}
-        [true^{\star}] \forall w \in \mathit{Wafer}, p \in \mathbb{N}. [RobotToRack(Rc, p, w) \cdot \overline{RobotFromRack(Rb,p,w)}^{\star} \\
-         \cdot RobotToRack(Rc,p,w)]false
+        \forall w \in \mathit{Wafer}, p \in \mathbb{N}. [true^{\star} \cdot RobotToRack(Rc, p, w) \\
+        \cdot \overline{(RobotFromRack(Rb,p,w) \cup (RobotFromRack(Rc,p,w))}^{\star} \\
+        \exists w':Wafer. RobotToRack(Rc,p,w')]false
     \end{multline*}
 
     \textbf{MCF19}
     \begin{multline*}
-        [true^{\star}] \forall w \in \mathit{\mathit{Wafer}}. [RobotFromProjector(w) \cdot  \forall w1 \in \mathit{Wafer}. \overline{RobotToProjector(w1)}^{\star} \\
+        \forall w \in \mathit{\mathit{Wafer}}. [true^{\star} \cdot RobotFromProjector(w) \cdot  \forall w1 \in \mathit{Wafer}. \overline{RobotToProjector(w1)}^{\star} \\
         . \exists w2 \in \mathit{Wafer}. Treat\mathit{Wafer}(w2)]false
     \end{multline*}
 
 	\section{Verification procedure}
 	%TODO[DONE] Add Commands used, System specifications the tests were run on (OS etc)
 	Several steps were taken to verify the correctness of this model. First, the model was translated into mCRL2 syntax. Next, all modal formulas were translated into the mcf format used by the mCRL2 tools. Once both translations were done, a linear process specification was generated from the mCRL2 input (using mcrl22lps). This LPS was used to verify the requirements by generating a parameterized boolean expression system for each modal formula (using the lps2pbes tool) and evaluating this expression by running pbes2bool.\\
-	For the verification of the system release version 201409.1.13218 of the mCRL2 tools was used. \\
+	For the verification of the system release version 201409.1.13218 of the mCRL2 tools was used. The exact verification environment is given in table \ref{ver-en}.\\
 
-	The system was verified for wafer counts from 1 to 5 to avoid any statespace problems. This should nonetheless present an accurate view of the system, as the maximum amount of wafers inside the vacuum chamber is at most the number of sluices, which is two.
+    \begin{table}[!h]
+        \centering
+        \begin{tabular}{|l|l|}
+        \hline
+            Operating Systems    & Windows7, Windows 8           \\ \hline
+            Machine              & HP EliteBook 8540, 2012 model \\ \hline
+            mcrl2 system release & 201409.1.13218 \\
+            \hline
+        \end{tabular}
+        \caption{The verification environment on which the model formulas were checked against the mcrl2 model.}
+        \label{ver-en}
+    \end{table}
 
-    \textbf{Verification environment}
-    The environment on which the model was checked using the modal formulas is given in table.
+	The system was verified for wafer counts from 1 to 5 to avoid any state space problems. This should nonetheless present an accurate view of the system, as the maximum amount of wafers inside the vacuum chamber is at most the number of sluices, which is two.
 
     \subsection{Commands}
     

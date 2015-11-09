@@ -1,0 +1,5 @@
+% This formula expresses SR13.
+% RobotFromRack( R, P ) can only happen if IsWaferOnRack( P ) is true for the same P.
+
+nu X( i:Int=0 ). forall w1,w2:Wafer. forall p:Nat. val(p<=RackSize)=> [!RobotToRack(Rc,p,w1) && !RobotFromRack(Rb,p,w2)] X(i) 
+&& exists w3:Wafer . [RobotToRack(Rc,p,w3)]X(i+1) && exists w4:Wafer . [RobotFromRack(Rb,p,w4)](val(i > 0) && X(i-1))
