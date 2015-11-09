@@ -486,7 +486,7 @@ These travel from the controller to the system. The controller-system interactio
 
     \textbf{MCF3}
     \begin{multline*}
-        \forall s \in SluiceID. [true^{\star} \cdot PumpVacuum(s) \cdot \overline{ReleaseVacuum}^{\star} \cdot OpenOuterDoor(s)]true
+        \forall s \in SluiceID.[true^{\star} \cdot PumpVacuum(s) \cdot \overline{ReleaseVacuum}^{\star} \cdot OpenOuterDoor(s)]true
     \end{multline*}
 
     \textbf{MCF4}
@@ -562,18 +562,18 @@ These travel from the controller to the system. The controller-system interactio
 
     \textbf{MCF10a}
     \begin{multline*}
-        \nu X(i=0). \forall s \in SluiceID. [\forall w1 \in Wafer. \overline{RobotToSluice(Rb,s,w1)} \\
-        \wedge \forall w2 \in Wafer. \overline{RobotFromSluice(Ra,s,w2)}] X(i) \\
-        \wedge [\exists w3 \in Wafer. RobotToSluice(Rb,s,w3)]X(i+1) \\
-        \wedge [\exists w4 \in Wafer.RobotFromSluice(Ra,s,w4)](i>0 \wedge X(i-1))
+        \nu X(i=0). \forall s \in SluiceID, \forall w1,w2 \in \mathit{Wafer}. \\
+        [\overline{RobotToSluice(Rb,s,w1) \cup RobotFromSluice(Ra,s,w2)}] X(i) \\
+        \wedge [\exists w3 \in \mathit{Wafer}. RobotToSluice(Rb,s,w3)]X(i+1) \\
+        \wedge [\exists w4 \in \mathit{Wafer}.RobotFromSluice(Ra,s,w4)](i>0 \wedge X(i-1))
     \end{multline*}
 
     \textbf{MCF10b}
     \begin{multline*}
-        \nu X(i=0). \forall s \in SluiceID. [\forall w1 \in Wafer. \overline{RobotToSluice(Ra,s,w1)} \\
-        \wedge \forall w2 \in Wafer. \overline{RobotFromSluice(Rb,s,w2)}] X(i) \\
-        \wedge [\exists w3 \in Wafer. RobotToSluice(Ra,s,w3)]X(i+1) \\
-        \wedge [\exists w4 \in Wafer.RobotFromSluice(Rb,s,w4)](i>0 \wedge X(i-1))
+        \nu X(i=0). \forall s \in SluiceID, \forall w1,w2 \in \mathit{Wafer}. \\
+        [\overline{RobotToSluice(Ra,s,w1) \cup RobotFromSluice(Rb,s,w2)}] X(i) \\
+        \wedge [\exists w3 \in \mathit{Wafer}. RobotToSluice(Ra,s,w3)]X(i+1) \\
+        \wedge [\exists w4 \in \mathit{Wafer}.RobotFromSluice(Rb,s,w4)](i>0 \wedge X(i-1))
     \end{multline*}
 
     \textbf{MCF11}
@@ -590,18 +590,18 @@ These travel from the controller to the system. The controller-system interactio
         \vee ReleaseVacuum(s) \vee SluiceBroken(s))]false
     \end{multline*}
 
-    \textbf{MCF13rb}
+    \textbf{MCF13a}
     \begin{multline*}
         \nu X(i=0). \forall w1,w2 \in \mathit{Wafer}. \forall p \in \mathbb{N}. \\
-        (p \leq RackSize) \rightarrow [\overline{RobotToRack(Rb,p,w1) \cup RobotToRack(Rc,p,w1)}]X(i) \\
+        (p \leq RackSize) \rightarrow [\overline{RobotToRack(Rb,p,w1) \cup RobotToRack(Rc,p,w2)}]X(i) \\
         \wedge \exists w3 \in \mathit{Wafer}. [RobotToRack(Rb,p,w3)]X(i+1) \\
         \wedge \exists w4 \in \mathit{Wafer}. [RobotFromRack(Rc,p,w4)]((i>0) \wedge X(i-1))
     \end{multline*}
 
-    \textbf{MCF13rc}
+    \textbf{MCF13b}
     \begin{multline*}
         \nu X(i=0). \forall w1,w2 \in \mathit{Wafer}. \forall p \in \mathbb{N}. \\
-        (p \leq RackSize) \rightarrow [\overline{RobotToRack(Rc,p,w1) \cup RobotToRack(Rb,p,w1)}]X(i) \\
+        (p \leq RackSize) \rightarrow [\overline{RobotToRack(Rc,p,w1) \cup RobotToRack(Rb,p,w2)}]X(i) \\
         \wedge \exists w3 \in \mathit{Wafer}. [RobotToRack(Rc,p,w3)]X(i+1) \\
         \wedge \exists w4 \in \mathit{Wafer}. [RobotFromRack(Rb,p,w4)]((i>0) \wedge X(i-1))
     \end{multline*}
@@ -677,20 +677,20 @@ These travel from the controller to the system. The controller-system interactio
     \begin{lstlisting}
         mcrl22lps.exe euv_waferstepper.mcrl2 euv_waferstepper.lps --lin-method=regular --rewriter=jitty --verbose
     \end{lstlisting}
-    
+
     The obtained \textbf{.lps} file is then used to generate parameterized boolean equation systems using the modal formulas and the model, which are then evaluated to true or false.\\
     Consider the following modal formula names: SR1.mcf, SR2a.mcf, SR2b.mcf, SR3.mcf, SR4.mcf, SR5.mcf, SR6a1.mcf, SR6a2.mcf, SR6b1.mcf, SR6b2.mcf, SR7a.mcf, SR7b.mcf, SR8a.mcf, SR8b.mcf, SR9a.mcf, SR9b.mcf, SR10a.mcf, SR10b.mcf, SR11.mcf, SR12.mcf, SR13a.mcf, SR13b.mcf, SR14.mcf, SR15.mcf, SR16.mcf, SR17.mcf, SR18a.mcf, SR18b.mcf, SR19.mcf.
-    
+
     We then do the following command to generate the \textbf{.pbes} file, we do this for each of the files specified, we refer to them in the command as modal\_formula\_filename:\\
      \begin{lstlisting}
         lps2pbes.exe euv_waferstepper.lps euv_waferstepper.pbes --formula=../<modal_formula_filename> --verbose
-    \end{lstlisting}   
-    
+    \end{lstlisting}
+
     And to evaluate the truth of the formula against the modal formula we do the following command:\\
     \begin{lstlisting}
         pbes2bool.exe euv_waferstepper.pbes --erase=none --rewriter=jitty --search=breadth-first --strategy=0 --verbose
-    \end{lstlisting} 
-    
+    \end{lstlisting}
+
 	\section{Verification results}
 	Results of the verification: All modal formulas evaluated to true. Thus all requirements are met by the system.
 	
